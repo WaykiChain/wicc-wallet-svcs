@@ -1,0 +1,54 @@
+bootRepackage.enabled = false
+
+apply plugin: "com.querydsl.generator"
+//apply plugin: 'java-library'
+apply plugin: 'kotlin'
+apply plugin: 'java'
+apply plugin: 'maven'
+
+buildscript {
+    ext.kotlin_version = '1.2.50'
+
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "gradle.plugin.com.querydsl.generator:querydsl-plugin:1.2.2"
+        classpath 'mysql:mysql-connector-java:5.1.40'
+    }
+}
+
+jar {
+    baseName = 'wicc-chain-commons'
+    version = "$version"
+}
+
+dependencies {
+    compile project(":wicc-chain-entity")
+    compile group: 'com.xuxueli', name: 'xxl-job-core', version: '1.9.2'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+

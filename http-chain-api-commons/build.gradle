@@ -1,0 +1,10 @@
+bootRepackage.enabled = false
+
+jar {
+    baseName = 'http-chain-api-commons'
+    version = "$version"
+}
+
+dependencies {
+    compile project(":wicc-chain-commons")
+}

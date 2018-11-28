@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.waykichain.ucenter.commons.biz.mapper.TradeMapperExt" >
+
+        <select id="TradeStatByTimeAndTradePaird" resultType="com.waykichain.coinx.commons.biz.domain.TradeStatInfoExt">
+                SELECT
+                max(deal_price) as maxDealPrice,
+                min(deal_price) as minDealPrice,
+                sum(deal_count) as dealCount,
+                sum(deal_price * deal_count)/sum(deal_count) as averageDealPrice
+                FROM
+                trade
+                WHERE
+                trade_pair_code = #{tradePairCode}
+                AND
+                created_at >= #{createdAt}
+        </select>
+
+</mapper>

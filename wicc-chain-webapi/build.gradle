@@ -1,0 +1,10 @@
+apply plugin: 'application'
+
+mainClassName = "com.waykichain.ApplicationKt"
+
+dependencies {
+    compile project(":wicc-chain-xservice")
+    compile project(":wicc-chain-pojo")
+    compile project(":http-chain-api-commons")
+
+}

@@ -1,0 +1,11 @@
+package com.waykichain.chain.controller
+
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+
+@RestController
+@RequestMapping("/ops")
+class OpsController {
+
+
+}

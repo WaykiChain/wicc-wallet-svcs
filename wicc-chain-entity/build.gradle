@@ -1,0 +1,71 @@
+bootRepackage.enabled = false
+
+apply plugin: "com.waykichain.utils.codegen"
+apply plugin: 'kotlin'
+apply plugin: 'java'
+apply plugin: 'maven'
+
+buildscript {
+    ext.kotlin_version = '1.2.50'
+
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "gradle.plugin.com.waykichain.utils.codegen:querydsl-plugin:1.2.27"
+        classpath 'mysql:mysql-connector-java:5.1.40'
+    }
+}
+
+jar {
+    baseName = 'wicc-chain-entity'
+    version = "$version"
+}
+
+dependencies {
+}
+
+querydsl {
+    driverClass = 'com.mysql.jdbc.Driver'
+    userName = 'wicc-rw'
+    password = 'wicc@123456'
+    jdbcUrl = 'jdbc:mysql://10.0.0.4:3306/wicc-chain-testnet?autoReconnect=true&useUnicode=yes&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false'
+
+    domainSrcPath = "$project.projectDir/src/main/java/"
+    domainPackageName = 'com.waykichain.chain.biz.domain'
+    repositorySrcPath = "$project.projectDir/src/main/kotlin/"
+    repositoryPackageName = 'com.waykichain.chain.commons.biz.repository.mysql'
+    serviceSrcPath = "$project.projectDir/../wicc-chain-commons/src/main/kotlin/"
+    servicePackageName = 'com.waykichain.chain.commons.biz.service'
+
+}
+
+task genCode(dependsOn: generateQueryDSL) {
+
+}
+
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+

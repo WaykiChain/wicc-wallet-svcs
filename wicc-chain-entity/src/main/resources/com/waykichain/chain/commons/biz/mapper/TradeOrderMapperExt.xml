@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.waykichain.coinx.commons.biz.mapper.TradeOrderMapperExt">
+
+
+    <update id="updateById">
+        update
+            trade_order  a
+        <set>
+
+            <if test="closeMsg !=null">
+                `close_msg`  = #{closeMsg},
+            </if>
+            <if test="closeCode !=null">
+                `close_code`  = #{closeCode},
+            </if>
+            <if test="closedAt !=null">
+                `closed_at`  = #{closedAt},
+            </if>
+
+            <if test="avgDealPrice !=null">
+                `avg_deal_price`  = #{avgDealPrice},
+            </if>
+
+            <if test="amount !=null ">
+                `amount`  = #{amount},
+            </if>
+
+            <if test="dealCount !=null">
+                `deal_count`  = #{dealCount},
+            </if>
+
+            <if test="dealAmount !=null">
+                `deal_amount`  = #{dealAmount},
+            </if>
+            <if test="dealFee !=null">
+                `deal_fee`  = #{dealFee},
+            </if>
+
+            <if test="dealTotal !=null">
+                `deal_total`  = #{dealTotal},
+            </if>
+            <if test="dealFeeRate !=null">
+                `deal_fee_rate`  = #{dealFeeRate},
+            </if>
+
+            <if test="changeAmount !=null">
+                `change_amount`  = #{changeAmount},
+            </if>
+            <if test="changeCount !=null">
+                `change_count`  = #{changeCount},
+            </if>
+
+            <if test="status !=null">
+                `status`  = #{status},
+            </if>
+        </set>
+        WHERE
+            `id` = #{oid}
+        <if test="lockStatuses !=null and lockStatuses.size>0">
+          <foreach collection="lockStatuses" open=" and status in(" close=")" item="id"
+                 separator=",">
+            #{id}
+          </foreach>
+        </if>
+    </update>
+</mapper>
+
+
+
+

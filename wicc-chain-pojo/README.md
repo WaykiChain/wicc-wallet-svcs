@@ -1,0 +1,1 @@
+## wicc common entity
