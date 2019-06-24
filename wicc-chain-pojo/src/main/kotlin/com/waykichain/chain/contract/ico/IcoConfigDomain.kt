@@ -13,7 +13,7 @@ class IcoConfigDomain {
     fun deserialize(contract:String):Int{
         systype = contract.substring(0,2)
         type = contract.substring(2,4)
-        return 8
+        return 4
     }
 
     override fun toString(): String {

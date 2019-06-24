@@ -8,6 +8,7 @@ buildscript {
     ext.kotlin_version = '1.2.50'
 
     repositories {
+        maven { url "http://nexus.wayki.cn/content/groups/public" }
         maven { url "https://plugins.gradle.org/m2/" }
         mavenCentral()
     }
@@ -38,6 +39,27 @@ dependencies {
 }
 
 
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "http://nexus.wayki.cn/content/repositories/2ndparty") {
+                authentication(userName: 'deployment', password: 'deployment123')
+            }
+            snapshotRepository(url: "http://nexus.wayki.cn/content/repositories/2ndparty-snapshots/") {
+                authentication(userName: 'deployment', password: 'deployment123')
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
 
 compileKotlin {
     kotlinOptions {

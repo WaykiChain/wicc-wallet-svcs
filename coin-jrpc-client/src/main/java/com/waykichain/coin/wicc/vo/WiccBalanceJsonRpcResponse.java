@@ -9,10 +9,8 @@ import lombok.Data;
  * */
 
 @Data
-public class WiccBalanceJsonRpcResponse {
+public class WiccBalanceJsonRpcResponse extends BaseJsonRpcResponse {
 
-    private String id;
     private WiccBalanceResult result;
-    private ErrorInfo error;
 
 }

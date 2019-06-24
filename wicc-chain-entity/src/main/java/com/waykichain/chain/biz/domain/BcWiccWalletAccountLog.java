@@ -41,9 +41,9 @@ public class BcWiccWalletAccountLog implements Serializable {
     @Column("fees")
     private Long fees;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("number")

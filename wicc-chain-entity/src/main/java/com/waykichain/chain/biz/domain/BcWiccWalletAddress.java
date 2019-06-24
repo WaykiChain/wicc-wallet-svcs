@@ -23,9 +23,9 @@ public class BcWiccWalletAddress implements Serializable {
     @Column("created_at")
     private java.util.Date createdAt;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("password")

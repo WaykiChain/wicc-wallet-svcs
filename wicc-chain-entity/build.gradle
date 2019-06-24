@@ -9,6 +9,7 @@ buildscript {
     ext.kotlin_version = '1.2.50'
 
     repositories {
+        maven { url "http://nexus.wayki.cn/content/groups/public" }
         maven { url "https://plugins.gradle.org/m2/" }
         mavenCentral()
     }
@@ -26,13 +27,14 @@ jar {
 }
 
 dependencies {
+    compile 'com.waykichain:wicc-commons:0.3.2-SNAPSHOT'
 }
 
 querydsl {
     driverClass = 'com.mysql.jdbc.Driver'
     userName = 'wicc-rw'
     password = 'wicc@123456'
-    jdbcUrl = 'jdbc:mysql://10.0.0.4:3306/wicc-chain-testnet?autoReconnect=true&useUnicode=yes&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false'
+    jdbcUrl = 'jdbc:mysql://myql-dev.wic.me:3306/wicc-chain-testnet?autoReconnect=true&useUnicode=yes&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false'
 
     domainSrcPath = "$project.projectDir/src/main/java/"
     domainPackageName = 'com.waykichain.chain.biz.domain'
@@ -47,6 +49,18 @@ task genCode(dependsOn: generateQueryDSL) {
 
 }
 
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "http://nexus.wayki.cn/content/repositories/2ndparty") {
+                authentication(userName: 'deployment', password: 'deployment123')
+            }
+            snapshotRepository(url: "http://nexus.wayki.cn/content/repositories/2ndparty-snapshots/") {
+                authentication(userName: 'deployment', password: 'deployment123')
+            }
+        }
+    }
+}
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'

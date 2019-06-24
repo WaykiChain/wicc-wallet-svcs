@@ -6,6 +6,30 @@ public class ContractUtil {
 
     public static final Long SYSTEM_SEND_COIN=85171907L;
 
+
+
+    /**
+     * 字符类型 Hex码转字符,  Convert Contract Content Hex to Contract Content String
+     * @param data
+     * @return
+     */
+    public static String ConvertContractData(String data)  {
+
+        byte[] utf8Data = new byte[data.length()/2];
+        for(int i=0,j=0; i<data.length(); i+=2,j++) {
+            String temp = data.substring(i, i+2);
+            utf8Data[j] = (byte)Integer.parseInt(temp,16);
+        }
+        try {
+            return  new String(utf8Data,"utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            //    logger.error("转化lua脚本失败直接返回hex码");
+        }
+        return data;
+    }
+
+
     //转换十六进制编码为字符串
     public static String hexToString(String s) {
         if ("0x".equals(s.substring(0, 2))) {

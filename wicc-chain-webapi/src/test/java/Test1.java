@@ -1,4 +1,5 @@
 import com.waykichain.chain.contract.util.ContractUtil;
+import com.waykichain.chain.contract.wusd.domain.ExchangeTokenDomain;
 import org.junit.Test;
 
 public class Test1 {
@@ -23,6 +24,27 @@ public class Test1 {
             System.out.println("i:" + Integer.toHexString(b[i] & 0xFF));
 
         }*/
+
+    }
+
+    public static void printByte(String str) {
+
+        for(int i=0; i<str.length(); i=i+2) {
+            System.out.print("0x" + str.substring(i, i+2) + ",");
+        }
+    }
+
+    @Test
+    public void printExchangeToken(){
+        ExchangeTokenDomain domain = new ExchangeTokenDomain();
+        double exchangeRate = 0.74;
+        long exchangeRateParam = (long) (exchangeRate * 10000);
+        domain.setExchangeRate(exchangeRateParam);
+        domain.setExchangeTokenAmount(22110*100000000L);
+
+        String ser = domain.serialize();
+        System.out.println("printExchangeToken:" + ser);
+        printByte(ser);
 
     }
 

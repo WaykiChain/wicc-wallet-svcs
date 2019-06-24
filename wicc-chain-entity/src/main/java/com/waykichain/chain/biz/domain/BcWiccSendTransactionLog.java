@@ -23,9 +23,9 @@ public class BcWiccSendTransactionLog implements Serializable {
     @Column("created_at")
     private java.util.Date createdAt;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("prameter")
@@ -39,6 +39,9 @@ public class BcWiccSendTransactionLog implements Serializable {
 
     @Column("request_uuid")
     private String requestUuid;
+
+    @Column("send_address")
+    private String sendAddress;
 
     @Column("status")
     private Integer status;
@@ -109,6 +112,14 @@ public class BcWiccSendTransactionLog implements Serializable {
 
     public void setRequestUuid(String requestUuid) {
         this.requestUuid = requestUuid;
+    }
+
+    public String getSendAddress() {
+        return sendAddress;
+    }
+
+    public void setSendAddress(String sendAddress) {
+        this.sendAddress = sendAddress;
     }
 
     public Integer getStatus() {

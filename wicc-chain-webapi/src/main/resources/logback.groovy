@@ -26,9 +26,9 @@ appender('FILE', RollingFileAppender) {
     }
     rollingPolicy(TimeBasedRollingPolicy) {
         fileNamePattern = "/tmp/wicc/logs/back/${logname}.%d{yyyy-MM-dd}-%i.log"
-        maxHistory = 15
+        maxHistory = 5
         timeBasedFileNamingAndTriggeringPolicy(SizeAndTimeBasedFNATP) {
-            maxFileSize = FileSize.valueOf("300mb")
+            maxFileSize = FileSize.valueOf("100mb")
         }
     }
 }
@@ -41,9 +41,9 @@ appender("ERROR_FILE", RollingFileAppender) {
     }
     rollingPolicy(TimeBasedRollingPolicy) {
         fileNamePattern = "/tmp/wicc/logs/back/${logname}-error.%d{yyyy-MM-dd}-%i.log"
-        maxHistory = 15
+        maxHistory = 5
         timeBasedFileNamingAndTriggeringPolicy(SizeAndTimeBasedFNATP) {
-            maxFileSize = FileSize.valueOf("300mb")
+            maxFileSize = FileSize.valueOf("100mb")
         }
     }
     filter(LevelFilter) {
@@ -60,5 +60,5 @@ logger("com.querydsl.jpa.impl", WARN)
 if (env == null || "dev".equalsIgnoreCase(env)) {
     root(TRACE, ["CONSOLE", "FILE", "ERROR_FILE"])
 } else {
-    root(DEBUG, ["CONSOLE", "FILE", "ERROR_FILE"])
+    root(ERROR, ["CONSOLE", "FILE", "ERROR_FILE"])
 }

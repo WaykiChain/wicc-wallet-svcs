@@ -5,10 +5,8 @@ import com.waykichain.coin.ErrorInfo;
 import lombok.Data;
 
 @Data
-public class WiccCreateContractTxJsonRpcResponse {
+public class WiccCreateContractTxJsonRpcResponse  extends BaseJsonRpcResponse{
 
-	private String id;
 	private WiccTxHashResult result;
-	private ErrorInfo error;
-	
+
 }

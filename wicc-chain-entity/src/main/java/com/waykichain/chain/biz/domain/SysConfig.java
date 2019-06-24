@@ -26,9 +26,9 @@ public class SysConfig implements Serializable {
     @Column("description")
     private String description;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("module")

@@ -10,6 +10,7 @@ buildscript {
     ext.kotlin_version = '1.2.50'
 
     repositories {
+        maven { url "http://nexus.wayki.cn/content/groups/public" }
         maven { url "https://plugins.gradle.org/m2/" }
         mavenCentral()
     }
@@ -28,7 +29,20 @@ jar {
 
 dependencies {
     compile project(":wicc-chain-entity")
-    compile group: 'com.xuxueli', name: 'xxl-job-core', version: '1.9.2'
+    compile 'com.waykichain:xxl-job-core:1.9.2'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "http://nexus.wayki.cn/content/repositories/2ndparty") {
+                authentication(userName: 'deployment', password: 'deployment123')
+            }
+            snapshotRepository(url: "http://nexus.wayki.cn/content/repositories/2ndparty-snapshots/") {
+                authentication(userName: 'deployment', password: 'deployment123')
+            }
+        }
+    }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

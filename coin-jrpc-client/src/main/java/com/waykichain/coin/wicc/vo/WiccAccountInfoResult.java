@@ -22,6 +22,7 @@ public class WiccAccountInfoResult {
     public Long Votes;
     public Integer UpdateHeight;
     public String postion;
+    public String position;
     public List<VoteFund>voteFundList;
 }
 

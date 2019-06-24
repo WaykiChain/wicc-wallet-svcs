@@ -1,6 +1,7 @@
 package com.waykichain.chain.commons.biz.service.impl
 
 import com.waykichain.chain.biz.domain.BcWiccOfflineTransacationLog
+import com.waykichain.chain.biz.domain.QBcWiccOfflineTransacationLog
 import com.waykichain.chain.commons.biz.repository.mysql.BcWiccOfflineTransacationLogRepository
 import com.waykichain.chain.commons.biz.service.BcWiccOfflineTransacationLogService
 import org.springframework.beans.factory.annotation.Autowired
@@ -8,6 +9,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class   BcWiccOfflineTransacationLogServiceImpl: BcWiccOfflineTransacationLogService {
+    override fun getByRequestUuid(uuid: String): BcWiccOfflineTransacationLog? {
+        return bcWiccOfflineTransacationLogRepository.findAll(QBcWiccOfflineTransacationLog.bcWiccOfflineTransacationLog.requestUuid.eq(uuid)).firstOrNull()
+    }
 
     override fun getById(id:Long): BcWiccOfflineTransacationLog? {
         return bcWiccOfflineTransacationLogRepository.findOne(id)

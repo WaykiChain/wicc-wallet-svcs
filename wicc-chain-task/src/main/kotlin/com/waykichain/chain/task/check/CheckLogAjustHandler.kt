@@ -35,8 +35,6 @@ class CheckLogAjustHandler : IJobHandler() {
 
     }
 
-
-
     val logger = LoggerFactory.getLogger(javaClass)
     @Autowired
     lateinit var bcWiccAccountCheckBatchRepository: BcWiccAccountCheckBatchRepository

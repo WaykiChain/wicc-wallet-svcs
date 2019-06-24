@@ -1,14 +1,20 @@
 package com.waykichain.chain.commons.biz.xservice.impl
 
+import com.waykichain.chain.commons.biz.dict.ErrorCode
 import com.waykichain.chain.commons.biz.service.BcWiccContractInfoService
 import com.waykichain.chain.commons.biz.utils.WiccUtils
 import com.waykichain.chain.commons.biz.xservice.WiccMethodClient
 import com.waykichain.chain.contract.util.ContractUtil
-import com.waykichain.coin.wicc.po.GetAppAccInfoPO
-import com.waykichain.coin.wicc.po.GetScriptDataPO
-import com.waykichain.coin.wicc.po.SendToAddressPO
+import com.waykichain.chain.po.QueryContractData
+import com.waykichain.chain.po.v2.ContractInfoPO
+import com.waykichain.chain.vo.ContractDataVO
+import com.waykichain.chain.vo.v2.ContractInfoVO
+import com.waykichain.coin.wicc.po.*
 import com.waykichain.coin.wicc.vo.WiccGetAppAccInfoJsonRpcResponse
+import com.waykichain.coin.wicc.vo.WiccGetContractRegidJsonRpcResponse
+import com.waykichain.coin.wicc.vo.WiccGetContractRegidResult
 import com.waykichain.coin.wicc.vo.WiccSubmitTxJsonRpcResponse
+import com.waykichain.commons.base.BizResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -23,13 +29,12 @@ import java.math.RoundingMode
 open class ContractXservice  {
 
 
-    fun getExchangeRatio(id:Long): BigDecimal? {
+    fun getExchangeRatio(regId:String): BigDecimal? {
 
-        val bcWiccContractInfo = bcWiccContractInfoService.getById(id)
 
-        var po = GetScriptDataPO()
-        po.setScriptid(bcWiccContractInfo!!.contractAddressRegId!!)
-        var key = ContractUtil.toHexString("exchangeRate")
+        var po = GetContractDataPO()
+        po.setContractRegid(regId)
+        var key = ContractUtil.toHexString("key_tokenrate")
         po.setKey(key);
         //     po.setKey("65786368616e676552617465");
         var response = wiccMethodClient.getClient().getScriptData(po)
@@ -45,7 +50,7 @@ open class ContractXservice  {
     fun testSendMoney(address:String): WiccSubmitTxJsonRpcResponse? {
         var  sendToAddressPO = SendToAddressPO()
         sendToAddressPO.amount = BigDecimal(100000000000)
-        sendToAddressPO.sendAddress = "wXzvgD3YwMccp5AVZDavLXkLFKMcmBChAx"
+        sendToAddressPO.sendAddress = "wNd7RL89zKpJ7BRxcLXZjyEdaFHcvkXaXn"
         sendToAddressPO.recvAddress = address
 
         var response = wiccMethodClient.getClient().sendToAddress(sendToAddressPO)
@@ -55,15 +60,14 @@ open class ContractXservice  {
     fun testSendMoney10W(address:String): WiccSubmitTxJsonRpcResponse? {
         var  sendToAddressPO = SendToAddressPO()
         sendToAddressPO.amount = BigDecimal(10000000000000)
-        sendToAddressPO.sendAddress = "wXzvgD3YwMccp5AVZDavLXkLFKMcmBChAx"
+        sendToAddressPO.sendAddress = "wNd7RL89zKpJ7BRxcLXZjyEdaFHcvkXaXn"
         sendToAddressPO.recvAddress = address
 
         var response = wiccMethodClient.getClient().sendToAddress(sendToAddressPO)
         return response
     }
 
-    fun getTokenBalance(regId:String, address:String): WiccGetAppAccInfoJsonRpcResponse?
-    {
+    fun getTokenBalance(regId:String, address:String): WiccGetAppAccInfoJsonRpcResponse? {
         var getAppAccInfoPO = GetAppAccInfoPO()
         getAppAccInfoPO.address = address
         getAppAccInfoPO.scriptid = regId
@@ -72,6 +76,71 @@ open class ContractXservice  {
         return response
     }
 
+    fun getContractRegid(txHash:String): WiccGetContractRegidJsonRpcResponse? {
+        var getContractRegidPO = GetContractRegidPO()
+        getContractRegidPO.hash = txHash
+        var response = wiccMethodClient.getClient().getContractRegid(getContractRegidPO)
+        return response
+    }
+
+    fun getContradtData(queryContractData: QueryContractData): ContractDataVO{
+        var getContractDataPO = GetContractDataPO()
+        getContractDataPO.contractRegid = queryContractData.contractRegid
+        getContractDataPO.key = ContractUtil.toHexString(queryContractData.key)
+        var response = wiccMethodClient.getClient().getContractDataRaw(getContractDataPO)
+
+        var contractDataVO = ContractDataVO()
+        contractDataVO.contractRegid = queryContractData.contractRegid
+        contractDataVO.key = queryContractData.key
+        if(response.error == null){
+            var hexData = response.result.value
+            if("STRING".equals(queryContractData.returnDataType)){
+                contractDataVO.value = ContractUtil.hexToString(hexData)
+            }
+            else if("NUMBER".equals(queryContractData.returnDataType)){
+                contractDataVO.value = ContractUtil.upsidedownHex(hexData).toLong(16)
+            }
+            else{
+                contractDataVO.value = hexData
+            }
+        }
+        else{
+            contractDataVO.errorMsg = response.error.message
+        }
+
+        return contractDataVO
+    }
+
+    /**
+     * 获取智能合约信息
+     *
+     * [RPC-getcontractinfo]
+     */
+     fun getContractInfo(po: ContractInfoPO):  BizResponse<ContractInfoVO> {
+
+        var contractInfoPO = GetContractInfoPO()
+        contractInfoPO.regid = po.regid
+        val response = wiccMethodClient.getClient().getContractInfo(contractInfoPO)
+        var bizResponse = BizResponse<ContractInfoVO>()
+        if (response.result != null) {
+            var vo = ContractInfoVO()
+            vo.contractregid = response.result.contract_regid
+            vo.contractmemo = response.result.contract_memo
+            vo.contractcontent = ContractUtil.ConvertContractData(response.result.contract_content)
+            bizResponse.data = vo
+        } else {
+            if (response.error != null)  {
+                bizResponse.code = response.error.code
+                bizResponse.msg = response.error.message
+            } else {
+                logger.error("getContractInfo() error,response=$response")
+                bizResponse.code = ErrorCode.RPC_RESPONSE_IS_NULL.code
+                bizResponse.msg =  ErrorCode.RPC_RESPONSE_IS_NULL.msg
+            }
+        }
+
+        return bizResponse
+    }
 /*
 
         override fun getBalance(address: String?): BalanceVO? {

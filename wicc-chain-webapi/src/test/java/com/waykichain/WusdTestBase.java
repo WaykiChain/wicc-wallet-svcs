@@ -12,7 +12,7 @@ public class WusdTestBase {
     @Before
     public void init() throws Exception {
         client = new JsonRpcClient(WusdTestConstants.JSON_RPC_IP,WusdTestConstants.JSON_RPC_PORT,
-                "waykichain", "admin@123", false);
+                WusdTestConstants.JSON_RPC_ADMIN, WusdTestConstants.JSON_RPC_PASSWORD, false);
         wiccMethods = new WiccMethods(client);
 
     }

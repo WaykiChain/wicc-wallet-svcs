@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class WiccGetScriptDataResult {
 
-    private String scritpid;
+    private String regid;
     private String key;
     private String value;
 

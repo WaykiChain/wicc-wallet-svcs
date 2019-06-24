@@ -5,8 +5,7 @@ import com.waykichain.chain.contract.util.ContractUtil
 class SetAdminDomain: WusdBaseDomain()  {
 
     var adminAddr:String = ""
-    // the contract name symbol
-    var symbol:String="0000"
+    var adminType:String="10"
 
     init {
         type = WusdConstants.WUSD_CONTRACT_TYPE_SET_ADMIN
@@ -15,10 +14,10 @@ class SetAdminDomain: WusdBaseDomain()  {
     override fun serialize():String{
         var result = super.serialize()
         result += ContractUtil.toHexString(adminAddr)
-/*        if(symbol.length!=4){
-            throw Exception("symbol length should be 4.")
-        }*/
-        result += ContractUtil.toHexString(symbol)
+        if(adminType.length!=2){
+            throw Exception("symbol length should be 2.")
+        }
+        result += adminType
         return result
     }
 
@@ -29,15 +28,14 @@ class SetAdminDomain: WusdBaseDomain()  {
         adminAddr = ContractUtil.hexToString(adminAddrHex)
 
         startIndex = endIndex
-        endIndex = startIndex + 5*2
-        var symbolHex = contract.substring(startIndex,endIndex)
-        symbol = ContractUtil.hexToString(symbolHex)
+        endIndex = startIndex + 2
+        adminType = contract.substring(startIndex,endIndex)
 
         return endIndex
     }
 
     override fun toString(): String {
-        return "SetAdminDomain(adminAddr='$adminAddr', symbol='$symbol')"
+        return "SetAdminDomain(adminAddr='$adminAddr', adminType='$adminType')"
     }
 
 }

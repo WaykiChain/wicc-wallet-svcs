@@ -13,6 +13,8 @@ class TxidDetailVO : Serializable {
     var amount:BigDecimal ?= null
     var fee:BigDecimal ?= null
     var contract:String ?= null
+    var memo:String ?= null
+    var arguments:String ?= null
 
 
 }

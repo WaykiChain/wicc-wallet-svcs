@@ -20,22 +20,22 @@ public class WiccInfoResult {
     public Long protocolversion;
     public Long walletversion;
     public BigDecimal balance;
-    public Integer blocks;
     public Integer timeoffset;
-    public String connections;
     public String proxy;
     public String nettype;
+    public Integer genblock;
     public String chainwork;
     public Long tipblocktime;
     public BigDecimal paytxfee;
     public BigDecimal relayfee;
     public Integer fuelrate;
     public Integer fuel;
-    @JsonProperty("data directory")
-    public String datadirectory;
-    public Integer syncheight;
-    @JsonProperty("tip block hash")
+    public String confdir;
+    public String datadir;
+    public Integer syncblockheight;
+    public Integer tipblockheight;
     public String tipblockhash;
+    public Integer connections;
     public String errors;
 
 }

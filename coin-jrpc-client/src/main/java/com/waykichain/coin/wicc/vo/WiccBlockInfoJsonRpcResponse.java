@@ -9,10 +9,8 @@ import lombok.Data;
  * */
 
 @Data
-public class WiccBlockInfoJsonRpcResponse {
+public class WiccBlockInfoJsonRpcResponse extends BaseJsonRpcResponse {
 
-    private String id;
     private WiccBlockInfoResult result;
-    private ErrorInfo error;
 
 }

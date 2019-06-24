@@ -5,5 +5,5 @@ import java.io.Serializable
 
 class TransactionsVO: Serializable {
     var transactions:List<TransactionVO> ?=null
-    var currentNumber:Int ?= null
+    var currentHeight:Int ?= null
 }

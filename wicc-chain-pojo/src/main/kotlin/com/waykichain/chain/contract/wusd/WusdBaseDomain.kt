@@ -2,12 +2,12 @@ package com.waykichain.chain.contract.wusd.domain
 
 open class WusdBaseDomain {
 
-    var systype:String = WusdConstants.WUSD_CONTRACT_SYSTYPE
-    var type:String = "00"
+    var systype: String = WusdConstants.WUSD_CONTRACT_SYSTYPE
+    var type: String = "00"
     var version: String = "0000"
 
-    open fun serialize():String{
-        return systype + type + version
+    open fun serialize(): String{
+        return "$systype$type$version"
     }
 
     open fun deserialize(contract:String):Int{

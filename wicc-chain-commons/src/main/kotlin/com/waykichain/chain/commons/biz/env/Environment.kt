@@ -10,7 +10,7 @@ object Environment : BaseEnv() {
     var WICC_SERVICE_ENVIRONMENT = env("WICC_SERVICE_ENVIRONMENT", "dev")
 
     @JvmField
-    val WICC_LOG_LEVEL = env("WICC_LOG_LEVEL", "TRACE")
+    val WICC_LOG_LEVEL = env("WICC_LOG_LEVEL", "ERROR")
     /**
      * mysql config
      */
@@ -19,9 +19,9 @@ object Environment : BaseEnv() {
     @JvmField
     val MYSQL_DRIVER = env("MYSQL_DRIVER", "com.mysql.jdbc.Driver")
     @JvmField
-    var MYSQL_USERNAME = env("MYSQL_USERNAME", "wicc-rw")
+    var MYSQL_USERNAME = env("MYSQL_USERNAME", "mysql_user")
     @JvmField
-    var MYSQL_PASSWORD = env("MYSQL_PASSWORD", "wicc@123456")
+    var MYSQL_PASSWORD = env("MYSQL_PASSWORD", "mysql_password")
 
     @JvmField
     val MYSQL_INITIALSIZE = env("MYSQL_INITIALSIZE", 10)
@@ -52,4 +52,10 @@ object Environment : BaseEnv() {
     @JvmField
     var MINI_TRANSER_AMOUNT = env("MINI_TRANSER_AMOUNT", 50000000)
 
+
+    /**
+     * 水龙头工具-发币地址
+     */
+    @JvmField
+    var TEST_MONEY_SENDER_ADDRESS = env("TEST_MONEY_SENDER_ADDRESS", "wNd7RL89zKpJ7BRxcLXZjyEdaFHcvkXaXn")
 }

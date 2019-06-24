@@ -136,6 +136,9 @@ enum class ErrorCode(val code: Int, val msg: String) {
     GAME_IS_UNAVAILABLE                 (8302,"游戏当前状态无法购买 Key"),
 
     SYS_INTERNAL_ERROR                  (9000, "系统不给力，请稍后再试"),
+    RPC_RESPONSE_IS_NULL                (9001, "rpc返回数据为空"),
+    UUID_IS_USED                        (9002, "uuid已被使用"),
+    GET_BLOCK_HEIGHT_FAIL               (9003, "获取区块高度失败"),
 
 
 

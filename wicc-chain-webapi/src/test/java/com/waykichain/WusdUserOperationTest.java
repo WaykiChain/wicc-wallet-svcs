@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
+import static org.junit.Assert.assertNotNull;
 
 public class WusdUserOperationTest {
 
@@ -22,7 +23,7 @@ public class WusdUserOperationTest {
     @Before
     public void init() throws Exception {
         client = new JsonRpcClient(WusdTestConstants.JSON_RPC_IP,WusdTestConstants.JSON_RPC_PORT,
-                "waykichain", "admin@1234", false);
+                WusdTestConstants.JSON_RPC_ADMIN, WusdTestConstants.JSON_RPC_PASSWORD, false);
         wiccMethods = new WiccMethods(client);
 
         createContractTxPO = new CreateContractTxPO();
@@ -33,17 +34,54 @@ public class WusdUserOperationTest {
     }
 
     @Test
-    public void testExchangeToken() throws Exception{
-        long exchagneWiccAmount = 1000 * 100000000L;
-
-        ExchangeTokenDomain domain = new ExchangeTokenDomain();
+    public void A_testExchangeToken() throws Exception{
+        long exchagneWiccAmount =  1 * 100000000L;
         double exchangeRate = WusdTestConstants.common_exchangeRate;
         long exchangeRateParam = (long) (exchangeRate * 10000);
-        domain.setExchangeRate(exchangeRateParam);
-        System.out.println("exchangeRate:" + exchangeRate);
-        System.out.println("exchagneWiccAmount:" + exchagneWiccAmount);
         long exchangeTokenCount = (long)(exchangeRate * exchagneWiccAmount);
+        System.out.println("exchangeRateParam:" + exchangeRateParam);
         System.out.println("exchangeTokenCount:" + exchangeTokenCount);
+
+        WiccCreateContractTxJsonRpcResponse response = testExchangeToken(exchagneWiccAmount, exchangeRateParam, exchangeTokenCount);
+        assertNull(response.getError());
+    }
+
+    @Test
+    public void A_B_testExchangeToken() throws Exception{
+        long exchagneWiccAmount =  1 * 100000000L;
+        double exchangeRate = WusdTestConstants.common_exchangeRate - 0.001;
+        long exchangeRateParam = (long) (exchangeRate * 10000);
+        long exchangeTokenCount = (long)(exchangeRate * exchagneWiccAmount);
+
+        WiccCreateContractTxJsonRpcResponse response = testExchangeToken(exchagneWiccAmount, exchangeRateParam, exchangeTokenCount);
+        assertNull(response.getError());
+    }
+
+    @Test
+    public void A_C_Error_testExchangeToken() throws Exception{
+        long exchagneWiccAmount = 1 * 100000000L;
+        double exchangeRate = WusdTestConstants.common_exchangeRate + 0.001;
+        long exchangeRateParam = (long) (exchangeRate * 10000);
+        long exchangeTokenCount = (long)(WusdTestConstants.common_exchangeRate * exchagneWiccAmount);
+
+        WiccCreateContractTxJsonRpcResponse response = testExchangeToken(exchagneWiccAmount, exchangeRateParam, exchangeTokenCount);
+        assertNotNull(response.getError());
+    }
+
+    @Test
+    public void A_D_Error_testExchangeToken() throws Exception{
+        long exchagneWiccAmount = 1 * 100000000L;
+        double exchangeRate = WusdTestConstants.common_exchangeRate;
+        long exchangeRateParam = (long) (exchangeRate * 10000);
+        long exchangeTokenCount = (long)(exchangeRate * exchagneWiccAmount + 1);
+
+        WiccCreateContractTxJsonRpcResponse response = testExchangeToken(exchagneWiccAmount, exchangeRateParam, exchangeTokenCount);
+        assertNotNull(response.getError());
+    }
+
+    private WiccCreateContractTxJsonRpcResponse testExchangeToken(long exchagneWiccAmount,long exchangeRateParam,long exchangeTokenCount) throws Exception{
+        ExchangeTokenDomain domain = new ExchangeTokenDomain();
+        domain.setExchangeRate(exchangeRateParam);
         domain.setExchangeTokenAmount( exchangeTokenCount);
         String contract = domain.serialize();
         System.out.println("printExchangeToken,contract:" + contract);
@@ -59,15 +97,16 @@ public class WusdUserOperationTest {
         createContractTxPO.setContract(contract);
         WiccCreateContractTxJsonRpcResponse response = wiccMethods.WiccCreateContractTx(createContractTxPO);
         System.out.println(response);
-
-        assertNull(response.getError());
+        return response;
     }
 
     @Test
-    public void testTransferTokenByUser() throws Exception{
+    public void B_testTransferTokenByUser() throws Exception{
+        long amount =2 * 100000000L;
+
         TransferTokenByUserDomain domain = new TransferTokenByUserDomain();
         domain.setTo(WusdTestConstants.normalAddr2);
-        domain.setAmount(1000);
+        domain.setAmount(amount);
         String contract = domain.serialize();
 
         TransferTokenByUserDomain domain_deser = new TransferTokenByUserDomain();

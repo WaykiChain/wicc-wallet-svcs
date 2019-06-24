@@ -98,4 +98,9 @@ class BatchBetByAdminDomain: WusdBaseDomain() {
         return endIndex
     }
 
+    override fun toString(): String {
+        return "BatchBetByAdminDomain(betCount=$betCount, betList=$betList)"
+    }
+
+
 }

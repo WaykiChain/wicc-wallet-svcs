@@ -29,10 +29,16 @@ public class BcWiccWalletAccount implements Serializable {
     @Column("created_at")
     private java.util.Date createdAt;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
+    @Column("desc")
+    private String desc;
+
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
+
+    @Column("memo")
+    private String memo;
 
     @Column("type")
     private Integer type;
@@ -72,12 +78,28 @@ public class BcWiccWalletAccount implements Serializable {
         this.createdAt = createdAt;
     }
 
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
     }
 
     public Integer getType() {

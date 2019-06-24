@@ -35,9 +35,9 @@ public class Coin implements Serializable {
     @Column("icon_url")
     private String iconUrl;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("mini_confirm_count")

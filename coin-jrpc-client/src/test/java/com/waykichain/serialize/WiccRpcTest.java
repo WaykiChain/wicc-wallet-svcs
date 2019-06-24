@@ -12,7 +12,7 @@ import org.junit.Test;
 
 /**
  *
- * <p><b>Created:</b> 18/08/16, 02:23 PM</p>
+ * <p><b>Created:</b> 18/08/16, 02:23 PM</p>F
  * @author <a href="mailto:samuel.quintana@globant.com">samuel</a>
  * @since 0.1.0
  */
@@ -24,18 +24,11 @@ public class WiccRpcTest {
     @Before
     public void init() throws Exception {
        client = new JsonRpcClient("10.0.0.4",6967,
-                "wikichain", "admin", false);
+                "wiccuser", "wicc1000", false);
+/*        client = new JsonRpcClient("47.107.82.41",6967,
+                "waykichain", "admin@123", false);*/
 
         wiccMethods = new WiccMethods(client);
-    }
-
-
-    @Test
-    public void Brush_testGetAddress()throws Exception {
-        for(int i=0; i<300; i++){
-            WiccAddressJsonRpcResponse response = wiccMethods.getNewAddress();
-            System.out.print(response);
-        }
     }
 
     @Test
@@ -105,8 +98,8 @@ public class WiccRpcTest {
     @Test
     public void testSendToAddress() throws Exception {
         SendToAddressPO sendToAddressPO =  new SendToAddressPO();
-        sendToAddressPO.sendAddress = "wTwrWser78mEa22f8mHfiHGrdKysTv8eBU";
-        sendToAddressPO.recvAddress = "wXscdWVUN9irrLGvJJDZiaBoKXvat6Pqa9";
+        sendToAddressPO.sendAddress = "wVC3y9Sm3JHe1N3heK93BGozPLKHgLGAhx";
+        sendToAddressPO.recvAddress = "0-2";
         sendToAddressPO.amount = new BigDecimal(10 * 100_000_000);
 
         WiccSubmitTxJsonRpcResponse response = wiccMethods.sendToAddress(sendToAddressPO);
@@ -118,9 +111,9 @@ public class WiccRpcTest {
         SendToAddressRawPO po = new SendToAddressRawPO();
         po.setFee(new Long(10000));
         po.setAmount(new Long(100000L));
-        po.setSrcaddress("wTwrWser78mEa22f8mHfiHGrdKysTv8eBU");
+        po.setSrcaddress("wVC3y9Sm3JHe1N3heK93BGozPLKHgLGAhx");
         po.setRecvaddress("wXscdWVUN9irrLGvJJDZiaBoKXvat6Pqa9");
-        po.setHeight(243038);
+        po.setHeight(2338);
 
         WiccRawTxJsonRpcResponse response = wiccMethods.sendToAddressRaw(po);
         System.out.println(response);
@@ -128,20 +121,20 @@ public class WiccRpcTest {
 
     @Test
     public void activeAddress() throws Exception {
-        String address = "wXzvgD3YwMccp5AVZDavLXkLFKMcmBChAx";
+        String address = "wNuoAkHbBY5ncRrEiYwjonizpnbUf72wox";
 
         WiccSubmitTxJsonRpcResponse response = wiccMethods.activeAddress(address);
         System.out.print(response);
     }
     @Test
     public void testGetBalance() throws Exception {
-        WiccBalanceJsonRpcResponse response = wiccMethods.getBalance("wXzvgD3YwMccp5AVZDavLXkLFKMcmBChAx");
+        WiccBalanceJsonRpcResponse response = wiccMethods.getBalance("0-2");
         System.out.print(response);
     }
 
     @Test
     public void testGetAccountInfo() throws Exception {
-        WiccAccountInfoJsonRpcResponse response = wiccMethods.getAccountInfo("wTMrkcgbfFWEWQxBs1XHvGgyTkd5JenQxP");
+        WiccAccountInfoJsonRpcResponse response = wiccMethods.getAccountInfo("0-2");
         System.out.print(response);
     }
 
@@ -159,8 +152,14 @@ public class WiccRpcTest {
 
     @Test
     public void testGetBlock() throws Exception {
-        WiccBlockJsonRpcResponse response = wiccMethods.getBlock(832968);
+        WiccBlockJsonRpcResponse response = wiccMethods.getBlock(20);
         System.out.print(response);
+    }
+
+    @Test
+    public void testGetBlockHash() throws Exception {
+        WiccGetBlockHashJsonRpcResponse response = wiccMethods.getBlockHash(100);
+        System.out.println(response);
     }
 
     @Test
@@ -175,9 +174,9 @@ public class WiccRpcTest {
 
     @Test
     public void testGetScriptId() throws Exception {
-        GetScriptIdPO getScriptIdPO = new GetScriptIdPO();
-        getScriptIdPO.setHash("3dcb5be9ccb623837baa77d0fad273fb3fda11f13a16f29937884e7c74ba8fcf");
-        WiccGetScriptIdJsonRpcResponse response = wiccMethods.getScriptId(getScriptIdPO);
+        GetContractRegidPO getRegidPO = new GetContractRegidPO();
+        getRegidPO.setHash("3dcb5be9ccb623837baa77d0fad273fb3fda11f13a16f29937884e7c74ba8fcf");
+        WiccGetContractRegidJsonRpcResponse response = wiccMethods.getContractRegid(getRegidPO);
         System.out.println(response);
     }
     
@@ -208,10 +207,19 @@ public class WiccRpcTest {
 
     @Test
     public void testGetScriptData() throws Exception {
-        GetScriptDataPO po = new GetScriptDataPO();
-        po.setScriptid("77092-1");
+        GetContractDataPO po = new GetContractDataPO();
+        po.setContractRegid("77092-1");
         po.setKey("65786368616e676552617465");
         WiccGetScriptDataJsonRpcResponse response = wiccMethods.getScriptData(po);
+        System.out.println(response);
+    }
+
+    @Test
+    public void testGetContractDataRaw() throws Exception {
+        GetContractDataPO po = new GetContractDataPO();
+        po.setContractRegid("77092-1");
+        po.setKey("65786368616e676552617465");
+        WiccGetScriptDataJsonRpcResponse response = wiccMethods.getContractDataRaw(po);
         System.out.println(response);
     }
 
@@ -227,14 +235,14 @@ public class WiccRpcTest {
     @Test
     public void testgettxdetails() throws Exception{
 
-        WiccGetTxDetailJsonRpcResponse response = wiccMethods.getTxDetail("65fb030c33085806cb09a02cf6e91051cda26e2b03ad8f90ce41398cc618227e");
+        WiccGetTxDetailJsonRpcResponse response = wiccMethods.getTxDetail("38d0a6dc434a08008c58c4c2e18991eb4e24ce840e065a7b5f9b0c238641fcc7");
         System.out.println(response.toString());
     }
 
     @Test
     public void submitTx() throws Exception{
 
-        WiccSubmitTxJsonRpcResponse response = wiccMethods.submitTx("03018aaf280480c855010486db260101858c20004730450221008c0a70b49a5cb30a9dcb4e5523ec6b20fe20f41467f1015020dfb21c66553b85022016d647e203b6951a7f01cbed6b264eeba554df4323b1e663a0152fcc511ce71f");
+        WiccSubmitTxJsonRpcResponse response = wiccMethods.submitTx("0301912203906c0114865044b3ac4f7e1facb0f881666ef557d441e0ffcd10858c200046304402202c7ed6242e231c78f43761c04e267dc925d10c031092a5f58c4b51c64c5c97d4022028c69e16e041ed8b10b3069df0688a6ca0b57681ba47e2396d9f6e9d4dc05ebc");
         System.out.println(response.toString());
     }
 }

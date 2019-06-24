@@ -29,9 +29,9 @@ public class SysChainMsgNotifySetting implements Serializable {
     @Column("group_name")
     private String groupName;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("module")

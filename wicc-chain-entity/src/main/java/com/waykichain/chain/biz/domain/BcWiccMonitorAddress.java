@@ -32,9 +32,9 @@ public class BcWiccMonitorAddress implements Serializable {
     @Column("heigh")
     private Integer heigh;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("memo")
