@@ -17,35 +17,4 @@ public class WiccGetAppAccInfoResult {
 
     public BigDecimal tokenAmount;
 
-    public String getmAccUserID() {
-        return mAccUserID;
-    }
-
-    public void setmAccUserID(String mAccUserID) {
-        this.mAccUserID = mAccUserID;
-    }
-
-    public Long getFreeValues() {
-        return FreeValues;
-    }
-
-    public void setFreeValues(Long freeValues) {
-        FreeValues = freeValues;
-    }
-
-    public List<Object> getvFreezedFund() {
-        return vFreezedFund;
-    }
-
-    public void setvFreezedFund(List<Object> vFreezedFund) {
-        this.vFreezedFund = vFreezedFund;
-    }
-
-    public BigDecimal getTokenAmount() {
-        return tokenAmount;
-    }
-
-    public void setTokenAmount(BigDecimal tokenAmount) {
-        this.tokenAmount = tokenAmount;
-    }
-}
+  }

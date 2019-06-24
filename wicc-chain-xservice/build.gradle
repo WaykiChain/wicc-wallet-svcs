@@ -8,6 +8,7 @@ buildscript {
     ext.kotlin_version = '1.2.50'
 
     repositories {
+        maven { url "http://nexus.wayki.cn/content/groups/public" }
         mavenCentral()
     }
 
@@ -25,6 +26,22 @@ dependencies {
     compile project(":wicc-chain-pojo")
     compile project(":wicc-chain-commons")
     compile project(":coin-jrpc-client")
+    compile 'com.waykichain:wicc-biz-redis:0.3.2-SNAPSHOT'
+    compile 'com.waykichain:wicc-biz-commons:0.700.332-SNAPSHOT'
+}
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "http://nexus.wayki.cn/content/repositories/2ndparty") {
+                authentication(userName: 'deployment', password: 'deployment123')
+            }
+            snapshotRepository(url: "http://nexus.wayki.cn/content/repositories/2ndparty-snapshots/") {
+                authentication(userName: 'deployment', password: 'deployment123')
+            }
+        }
+    }
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

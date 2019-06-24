@@ -9,10 +9,8 @@ import lombok.Data;
  * */
 
 @Data
-public class WiccSendToAddressJsonRpcResponse {
+public class WiccSendToAddressJsonRpcResponse extends BaseJsonRpcResponse {
 
-    private String id;
     private String result;
-    private ErrorInfo error;
 
 }

@@ -7,7 +7,7 @@ interface BcWiccContractInfoService {
 
     fun save(bcWiccContractInfo: BcWiccContractInfo): BcWiccContractInfo
 
-    fun getByAddress(contractAddress: String?): BcWiccContractInfo
+    fun getByAddress(contractAddress: String?, contractAdminType:Int): BcWiccContractInfo
 
     fun getByActive(): BcWiccContractInfo
 }

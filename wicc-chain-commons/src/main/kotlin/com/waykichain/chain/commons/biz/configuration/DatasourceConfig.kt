@@ -11,7 +11,7 @@ import javax.sql.DataSource
 
 
 /**
- * Created by Joss on 2017/7/25.
+ * Created by zhangxinglin on 2017/7/25.
  */
 @Configuration
 open class DatasourceConfig {

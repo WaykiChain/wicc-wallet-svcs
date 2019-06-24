@@ -4,10 +4,8 @@ import com.waykichain.coin.ErrorInfo;
 import lombok.Data;
 
 @Data
-public class WiccGetScriptDataJsonRpcResponse {
+public class WiccGetScriptDataJsonRpcResponse extends BaseJsonRpcResponse{
 
-    private String id;
     private WiccGetScriptDataResult result;
-    private ErrorInfo error;
 
 }

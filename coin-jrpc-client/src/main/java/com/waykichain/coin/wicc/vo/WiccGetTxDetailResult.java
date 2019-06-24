@@ -24,14 +24,16 @@ public class WiccGetTxDetailResult {
 
     private Long fees;
     private Integer height;
-    public String Contract;
+    public String memo;
+    public String arguments;
+
     private String blockhash;
-    private Integer confirmHeight;
+    private Integer confirmedheight;
     private Long confirmedtime;
     private String rawtx;
     private String pubkey;
     @JsonProperty("miner_pubkey")
-    private String minerPubkey;
+    private String minerpubkey;
     private String script;
     @JsonProperty("listOutput")
     private List<String> listOutput;

@@ -4,6 +4,6 @@ import java.io.Serializable
 
 class QueryTransactionPO:Serializable {
     var symbol:String ?= null
-    var recvAddress:String ?=null
+    var address:String ?=null
     var startNumber:Int?= null
 }

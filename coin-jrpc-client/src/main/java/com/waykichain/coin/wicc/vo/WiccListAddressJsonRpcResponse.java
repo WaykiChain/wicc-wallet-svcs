@@ -11,10 +11,8 @@ import java.util.List;
  * */
 
 @Data
-public class WiccListAddressJsonRpcResponse {
+public class WiccListAddressJsonRpcResponse extends BaseJsonRpcResponse{
 
-    private String id;
     private List<WiccListAddressResult> result;
-    private ErrorInfo error;
 
 }

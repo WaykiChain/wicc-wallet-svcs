@@ -18,6 +18,7 @@ logging:
     org.springframework.validation: WARN
     org.springframework.web: WARN
     org.springframework.web.socket: WARN
+    com.wicc.zww: TRACE
 
 server:
   port: 9000

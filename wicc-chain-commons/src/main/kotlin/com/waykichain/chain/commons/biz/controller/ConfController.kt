@@ -1,7 +1,7 @@
 package com.waykichain.chain.commons.biz.controller
 
 
-import com.waykichain.chain.commons.biz.domain.BizResponse
+import com.waykichain.commons.base.BizResponse
 import io.swagger.annotations.Api
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping

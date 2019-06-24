@@ -20,6 +20,10 @@ class BcWiccBlockServiceImpl: BcWiccBlockService {
         return bcWiccBlockRepository.save(bcWiccBlock)
     }
 
+    override fun getByHeight(height: Int): BcWiccBlock?{
+        return bcWiccBlockRepository.findOne(QBcWiccBlock.bcWiccBlock.height.eq(height))
+    }
+
     override fun getLastBlockId(): Int? {
 
         var page = 0

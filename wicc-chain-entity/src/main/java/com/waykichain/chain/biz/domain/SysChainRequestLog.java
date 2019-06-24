@@ -29,9 +29,9 @@ public class SysChainRequestLog implements Serializable {
     @Column("error_code")
     private Integer errorCode;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("method")

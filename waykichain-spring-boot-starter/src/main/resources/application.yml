@@ -1,0 +1,29 @@
+logging:
+  pattern:
+    #控制台输出格式
+    console: "%d %-5level %logger : %msg%n"
+    #文件输出格式
+    file: "%d %-5level [%thread] %logger : %msg%n"
+  level:'WARN'
+    org.eclipse.jetty:
+    org.apache: WARN
+    org.apache.catalina.webresources.Cache: ERROR
+    org.hibernate: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type: WARN
+    org.hibernate.jpa.internal: ERROR
+    org.hibernate.validator.internal: WARN
+    org.springframework: WARN
+    org.springframework.data.jpa: WARN
+    org.springframework.validation: WARN
+
+spring:
+  profiles:
+    active: default
+
+  jpa:
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+
+  messages:
+    basename: i18n/messages

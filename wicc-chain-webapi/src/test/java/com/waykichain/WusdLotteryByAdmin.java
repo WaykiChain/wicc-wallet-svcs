@@ -11,12 +11,15 @@ import com.waykichain.coin.wicc.WiccMethods;
 import com.waykichain.coin.wicc.po.CreateContractTxPO;
 import com.waykichain.coin.wicc.vo.WiccCreateContractTxJsonRpcResponse;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class WusdLotteryByAdmin {
 
     JsonRpcClient client;
@@ -27,13 +30,13 @@ public class WusdLotteryByAdmin {
 
     @Before
     public void init() throws Exception {
-        client = new JsonRpcClient(WusdTestConstants.JSON_RPC_IP,6967,
-                "waykichain", "admin@123", false);
+        client = new JsonRpcClient(WusdTestConstants.JSON_RPC_IP,WusdTestConstants.JSON_RPC_PORT,
+                WusdTestConstants.JSON_RPC_ADMIN, WusdTestConstants.JSON_RPC_PASSWORD, false);
         wiccMethods = new WiccMethods(client);
 
         createContractTxPO = new CreateContractTxPO();
-    //    createContractTxPO.setUserregid(WusdTestConstants.adminAddr);
-        createContractTxPO.setUserregid(WusdTestConstants.normalAddr);
+        createContractTxPO.setUserregid(WusdTestConstants.adminAddr);
+    //    createContractTxPO.setUserregid(WusdTestConstants.normalAddr);
         createContractTxPO.setAppId(WusdTestConstants.appid);
         createContractTxPO.setAmount(0L);
         createContractTxPO.setFee(1000000L);
@@ -41,7 +44,7 @@ public class WusdLotteryByAdmin {
 
 
     @Test
-    public void testRecordLotteryBetDomain() throws Exception {
+    public void A_testRecordLotteryBetDomain() throws Exception {
         RecordLotteryBetDomain recordLotteryBetDomain = new RecordLotteryBetDomain();
         recordLotteryBetDomain.setUserId("1234567890");
         recordLotteryBetDomain.setLotteryInfo("Hello<br/>Lotter<br/>彩票信息<br/>投注1");
@@ -55,18 +58,20 @@ public class WusdLotteryByAdmin {
         assertEquals(recordLotteryBetDomain.getUserId(),recordLotteryBetDomain_Deser.getUserId());
         assertEquals(recordLotteryBetDomain.getLotteryInfo(),recordLotteryBetDomain_Deser.getLotteryInfo());
 
-/*        createContractTxPO.setContract(contract);
+        createContractTxPO.setContract(contract);
         WiccCreateContractTxJsonRpcResponse response = wiccMethods.WiccCreateContractTx(createContractTxPO);
         System.out.println(response);
-        checkResponse(response);*/
+        checkResponse(response);
     }
 
     @Test
-    public void testRecordLotteryOpenPrizeDomain() throws Exception {
+    public void B_testRecordLotteryOpenPrizeDomain() throws Exception {
         RecordLotteryOpenPrizeDomain domain = new RecordLotteryOpenPrizeDomain();
         domain.setUserId("1234567890");
         domain.setLotteryInfo("肖远航");
         String contract = domain.serialize();
+
+        System.out.println(contract);
 
         RecordLotteryOpenPrizeDomain domain_Deser = new RecordLotteryOpenPrizeDomain();
         domain_Deser.deserialize(contract);
@@ -82,11 +87,11 @@ public class WusdLotteryByAdmin {
     }
 
     @Test
-    public void testLotteryBet() throws Exception{
+    public void C_testLotteryBet() throws Exception{
         LotteryBetDomain lotteryBetDomain = new LotteryBetDomain();
         lotteryBetDomain.setFrom(WusdTestConstants.normalAddr);
         lotteryBetDomain.setTo(lotteryBankerId);
-        lotteryBetDomain.setAmount(1000L);
+        lotteryBetDomain.setAmount(71999990000L);
         String contract = lotteryBetDomain.serialize();
         System.out.println("contract:" + contract);
 
@@ -102,11 +107,11 @@ public class WusdLotteryByAdmin {
     }
 
     @Test
-    public void testLotteryOpenPrize() throws Exception{
+    public void D_testLotteryOpenPrize() throws Exception{
         LotteryOpenPrizeDomain domain = new LotteryOpenPrizeDomain();
         domain.setFrom(lotteryBankerId);
         domain.setTo(WusdTestConstants.normalAddr);
-        domain.setAmount(1000L);
+        domain.setAmount(70000L);
         String contract = domain.serialize();
         System.out.println("contract:" + contract);
 
@@ -122,9 +127,9 @@ public class WusdLotteryByAdmin {
     }
 
     private void checkResponse(WiccCreateContractTxJsonRpcResponse response){
-   //     assertNull(response.getError());
-        String checkAccountFalse_Msg = "Error:run-script-error:luaL_loadbuffer fail:[string \"line\"]:289: Check Admin Account false\n";
-        assertEquals(checkAccountFalse_Msg,response.getError().getMessage());
+        assertNull(response.getError());
+/*        String checkAccountFalse_Msg = "Error:run-script-error:luaL_loadbuffer fail:[string \"line\"]:289: Check Admin Account false\n";
+        assertEquals(checkAccountFalse_Msg,response.getError().getMessage());*/
     }
 
     public void assertWusdBaseDomain(WusdBaseDomain target, WusdBaseDomain src){

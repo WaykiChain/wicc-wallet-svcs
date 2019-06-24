@@ -38,9 +38,9 @@ public class BcWiccBlock implements Serializable {
     @Column("height")
     private Integer height;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("merkle_root")

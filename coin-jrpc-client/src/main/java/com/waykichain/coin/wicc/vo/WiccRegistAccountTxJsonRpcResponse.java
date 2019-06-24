@@ -8,7 +8,7 @@ import lombok.Data;
  * */
 
 @Data
-public class WiccRegistAccountTxJsonRpcResponse {
+public class WiccRegistAccountTxJsonRpcResponse extends BaseJsonRpcResponse{
     private String hash;
 
 }

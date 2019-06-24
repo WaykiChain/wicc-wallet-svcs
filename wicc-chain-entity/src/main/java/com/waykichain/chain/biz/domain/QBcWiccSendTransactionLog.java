@@ -38,6 +38,8 @@ public class QBcWiccSendTransactionLog extends com.querydsl.sql.RelationalPathBa
 
     public final StringPath requestUuid = createString("requestUuid");
 
+    public final StringPath sendAddress = createString("sendAddress");
+
     public final NumberPath<Integer> status = createNumber("status", Integer.class);
 
     public final NumberPath<Long> transAmount = createNumber("transAmount", Long.class);
@@ -83,6 +85,7 @@ public class QBcWiccSendTransactionLog extends com.querydsl.sql.RelationalPathBa
         addMetadata(recvAddress, ColumnMetadata.named("recv_address").withIndex(3).ofType(Types.VARCHAR).withSize(64));
         addMetadata(remark, ColumnMetadata.named("remark").withIndex(10).ofType(Types.LONGVARCHAR).withSize(65535));
         addMetadata(requestUuid, ColumnMetadata.named("request_uuid").withIndex(2).ofType(Types.VARCHAR).withSize(64));
+        addMetadata(sendAddress, ColumnMetadata.named("send_address").withIndex(13).ofType(Types.VARCHAR).withSize(64));
         addMetadata(status, ColumnMetadata.named("status").withIndex(9).ofType(Types.INTEGER).withSize(10));
         addMetadata(transAmount, ColumnMetadata.named("trans_amount").withIndex(5).ofType(Types.BIGINT).withSize(19));
         addMetadata(transFee, ColumnMetadata.named("trans_fee").withIndex(6).ofType(Types.BIGINT).withSize(19));

@@ -23,6 +23,9 @@ public class BcWiccContractInfo implements Serializable {
     @Column("admin_address")
     private String adminAddress;
 
+    @Column("admin_address_type")
+    private Integer adminAddressType;
+
     @Column("coin_symbol")
     private String coinSymbol;
 
@@ -35,9 +38,9 @@ public class BcWiccContractInfo implements Serializable {
     @Column("created_at")
     private java.util.Date createdAt;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("updated_at")
@@ -57,6 +60,14 @@ public class BcWiccContractInfo implements Serializable {
 
     public void setAdminAddress(String adminAddress) {
         this.adminAddress = adminAddress;
+    }
+
+    public Integer getAdminAddressType() {
+        return adminAddressType;
+    }
+
+    public void setAdminAddressType(Integer adminAddressType) {
+        this.adminAddressType = adminAddressType;
     }
 
     public String getCoinSymbol() {

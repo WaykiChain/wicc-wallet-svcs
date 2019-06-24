@@ -53,9 +53,9 @@ public class BcWiccAccountAjustLog implements Serializable {
     @Column("eod")
     private java.util.Date eod;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Long id;
 
     @Column("memo")

@@ -50,9 +50,9 @@ public class BcWiccTransaction implements Serializable {
     @Column("height")
     private Integer height;
 
-    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
-    @Id
     @Column("id")
+    @Id
+    @GeneratedValue(strategy=javax.persistence.GenerationType.IDENTITY)
     private Integer id;
 
     @Column("list_output")

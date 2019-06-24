@@ -6,10 +6,17 @@ import java.util.*
 
 class TransactionVO: Serializable {
     var symbol:String ?= null
-    var number:Int ?= null
-    var recvAddress:String ?= null
+    var confirmedHeight:Int ?= null
+    var srcAddress:String ?= null
+    var desAddress: String? = null
     var tx:String ?= null
     var amount:BigDecimal ?= null
-    var transactionAt: Date ?= null
+    var confirmedTime: Date ?= null
+    var fees: BigDecimal? = null
+    var height: Int? = null
+    var contract: String? = null
+    var srcRegId: String? = null
+    var desRegId: String? = null
+    var txType: Int? = null
 
 }

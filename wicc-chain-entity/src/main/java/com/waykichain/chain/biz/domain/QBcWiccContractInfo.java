@@ -28,6 +28,8 @@ public class QBcWiccContractInfo extends com.querydsl.sql.RelationalPathBase<BcW
 
     public final StringPath adminAddress = createString("adminAddress");
 
+    public final NumberPath<Integer> adminAddressType = createNumber("adminAddressType", Integer.class);
+
     public final StringPath coinSymbol = createString("coinSymbol");
 
     public final StringPath contractAddress = createString("contractAddress");
@@ -68,14 +70,15 @@ public class QBcWiccContractInfo extends com.querydsl.sql.RelationalPathBase<BcW
     }
 
     public void addMetadata() {
-        addMetadata(active, ColumnMetadata.named("active").withIndex(6).ofType(Types.INTEGER).withSize(10));
-        addMetadata(adminAddress, ColumnMetadata.named("admin_address").withIndex(3).ofType(Types.VARCHAR).withSize(64));
+        addMetadata(active, ColumnMetadata.named("active").withIndex(7).ofType(Types.INTEGER).withSize(10));
+        addMetadata(adminAddress, ColumnMetadata.named("admin_address").withIndex(4).ofType(Types.VARCHAR).withSize(64));
+        addMetadata(adminAddressType, ColumnMetadata.named("admin_address_type").withIndex(3).ofType(Types.INTEGER).withSize(10));
         addMetadata(coinSymbol, ColumnMetadata.named("coin_symbol").withIndex(2).ofType(Types.VARCHAR).withSize(32));
-        addMetadata(contractAddress, ColumnMetadata.named("contract_address").withIndex(4).ofType(Types.VARCHAR).withSize(64));
-        addMetadata(contractAddressRegId, ColumnMetadata.named("contract_address_reg_id").withIndex(5).ofType(Types.VARCHAR).withSize(32));
-        addMetadata(createdAt, ColumnMetadata.named("created_at").withIndex(7).ofType(Types.TIMESTAMP).withSize(19).notNull());
+        addMetadata(contractAddress, ColumnMetadata.named("contract_address").withIndex(5).ofType(Types.VARCHAR).withSize(64));
+        addMetadata(contractAddressRegId, ColumnMetadata.named("contract_address_reg_id").withIndex(6).ofType(Types.VARCHAR).withSize(32));
+        addMetadata(createdAt, ColumnMetadata.named("created_at").withIndex(8).ofType(Types.TIMESTAMP).withSize(19).notNull());
         addMetadata(id, ColumnMetadata.named("id").withIndex(1).ofType(Types.BIGINT).withSize(20).notNull());
-        addMetadata(updatedAt, ColumnMetadata.named("updated_at").withIndex(8).ofType(Types.TIMESTAMP).withSize(19));
+        addMetadata(updatedAt, ColumnMetadata.named("updated_at").withIndex(9).ofType(Types.TIMESTAMP).withSize(19));
     }
 
 }

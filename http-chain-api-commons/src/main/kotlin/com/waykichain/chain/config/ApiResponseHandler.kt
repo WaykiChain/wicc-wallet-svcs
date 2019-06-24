@@ -5,9 +5,9 @@ import com.alibaba.fastjson.JSONObject
 import com.waykichain.bet.commons.biz.exception.BizException
 import com.waykichain.chain.biz.domain.SysChainRequestLog
 import com.waykichain.chain.commons.biz.dict.ErrorCode
-import com.waykichain.chain.commons.biz.domain.BizResponse
 import com.waykichain.chain.commons.biz.service.SysChainRequestLogService
 import com.waykichain.chain.commons.biz.vo.HttpLogMessage
+import com.waykichain.commons.base.BizResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.web.ServerProperties

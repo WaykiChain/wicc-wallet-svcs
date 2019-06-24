@@ -13,5 +13,6 @@ class AccountInfoVO : Serializable {
     var votes: Long? = null
     var updateHeight: Int? = null
     var postion: String? = null
+    var position: String?=null
 
 }

@@ -7,6 +7,7 @@ interface BcWiccBlockService {
 
     fun getLastBlockId():Int?
 
+    fun getByHeight(height: Int): BcWiccBlock?
 
     fun save(bcWiccBlock: BcWiccBlock): BcWiccBlock
 }

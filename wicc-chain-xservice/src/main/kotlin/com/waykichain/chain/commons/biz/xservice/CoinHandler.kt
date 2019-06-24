@@ -1,8 +1,11 @@
 package com.waykichain.chain.commons.biz.xservice
 
+import com.waykichain.chain.biz.domain.BcWiccBlock
 import com.waykichain.chain.po.*
 import com.waykichain.chain.vo.*
+import com.waykichain.coin.wicc.po.CreateContractPO
 import com.waykichain.coin.wicc.vo.WiccInfoJsonRpcResponse
+import java.math.BigDecimal
 
 /**
  * Created by Joss on 05/16/18.
@@ -34,6 +37,7 @@ abstract class CoinHandler {
 
     abstract fun getChainTxidInfo(txid:String): TxidDetailVO
 
+    abstract fun composed()
 
     abstract fun getBalance(address: String?): BalanceVO?
 
@@ -47,5 +51,21 @@ abstract class CoinHandler {
 
 
     abstract fun getChainInfo(): WiccInfoJsonRpcResponse?
+
+    abstract fun getChainTxidDetailInfo(txid: String) : TxidDetailInfoVO?
+
+    abstract fun registerAccountTx(queryAccountInfoPO: QueryAccountInfoPO) : String?
+
+    abstract fun createContract(createContractPO: CreateContractPO): String?
+
+    abstract fun getBlockHash(blockId:Int): String?
+
+    abstract fun getBlockCount(): Long?
+
+    abstract fun getTotalCoin(): BigDecimal?
+
+    abstract fun getBlockByHeight(height: Int): BcWiccBlock
+
+    abstract fun checkRollback()
 
 }

@@ -5,6 +5,7 @@ import com.waykichain.chain.commons.biz.repository.mysql.BcWiccAccountCheckBatch
 import com.waykichain.chain.commons.biz.xservice.AccountCheckXService
 import com.waykichain.chain.dict.AccountCheckBatchStatus
 import io.swagger.annotations.ApiModelProperty
+import io.swagger.annotations.ApiOperation
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,7 +18,7 @@ class AccountCheckController {
 
 
     @GetMapping("/gen/log")
-    @ApiModelProperty(value = "生成对账记录", notes = "生成对账记录")
+    @ApiOperation(value = "生成对账记录", notes = "生成对账记录")
     fun genCheckLog() {
         val batches = bcWiccAccountCheckBatchRepository.findAll(
                 QBcWiccAccountCheckBatch.bcWiccAccountCheckBatch.status.eq(AccountCheckBatchStatus.SUBMIT.code))
@@ -28,7 +29,7 @@ class AccountCheckController {
     }
 
     @GetMapping("/ajust/log")
-    @ApiModelProperty(value = "生成对账记录", notes = "生成对账记录")
+    @ApiOperation(value = "生成对账记录", notes = "生成对账记录")
     fun onAjuestLog() {
         val batches = bcWiccAccountCheckBatchRepository.findAll(
                 QBcWiccAccountCheckBatch.bcWiccAccountCheckBatch.status.eq(AccountCheckBatchStatus.CHECK_FINISHED.code))
