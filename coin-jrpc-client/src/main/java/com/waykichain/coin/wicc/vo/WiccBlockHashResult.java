@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 public class WiccBlockHashResult {
 
-    private String hash;
+    private String txid;
 
 }

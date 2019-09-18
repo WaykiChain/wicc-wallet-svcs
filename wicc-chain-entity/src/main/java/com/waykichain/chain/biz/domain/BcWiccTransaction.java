@@ -26,6 +26,12 @@ public class BcWiccTransaction implements Serializable {
     @Column("block_number")
     private Integer blockNumber;
 
+    @Column("money")
+    private Long money;
+
+    @Column("coin_symbol")
+    private String coinSymbol;
+
     @Column("confirmed_time")
     private Long confirmedTime;
 
@@ -47,6 +53,9 @@ public class BcWiccTransaction implements Serializable {
     @Column("fees")
     private Long fees;
 
+    @Column("fee_symbol")
+    private String feeSymbol;
+
     @Column("height")
     private Integer height;
 
@@ -60,9 +69,6 @@ public class BcWiccTransaction implements Serializable {
 
     @Column("miner_pubkey")
     private String minerPubkey;
-
-    @Column("money")
-    private Long money;
 
     @Column("oper_vote_fund_list")
     private String operVoteFundList;
@@ -78,6 +84,9 @@ public class BcWiccTransaction implements Serializable {
 
     @Column("script")
     private String script;
+
+    @Column("tx_content")
+    private String txContent;
 
     @Column("txid")
     private String txid;
@@ -113,6 +122,22 @@ public class BcWiccTransaction implements Serializable {
 
     public void setBlockNumber(Integer blockNumber) {
         this.blockNumber = blockNumber;
+    }
+
+    public Long getMoney() {
+        return money;
+    }
+
+    public void setMoney(Long money) {
+        this.money = money;
+    }
+
+    public String getCoinSymbol() {
+        return coinSymbol;
+    }
+
+    public void setCoinSymbol(String coinSymbol) {
+        this.coinSymbol = coinSymbol;
     }
 
     public Long getConfirmedTime() {
@@ -171,6 +196,14 @@ public class BcWiccTransaction implements Serializable {
         this.fees = fees;
     }
 
+    public String getFeeSymbol() {
+        return feeSymbol;
+    }
+
+    public void setFeeSymbol(String feeSymbol) {
+        this.feeSymbol = feeSymbol;
+    }
+
     public Integer getHeight() {
         return height;
     }
@@ -201,14 +234,6 @@ public class BcWiccTransaction implements Serializable {
 
     public void setMinerPubkey(String minerPubkey) {
         this.minerPubkey = minerPubkey;
-    }
-
-    public Long getMoney() {
-        return money;
-    }
-
-    public void setMoney(Long money) {
-        this.money = money;
     }
 
     public String getOperVoteFundList() {
@@ -249,6 +274,14 @@ public class BcWiccTransaction implements Serializable {
 
     public void setScript(String script) {
         this.script = script;
+    }
+
+    public String getTxContent() {
+        return txContent;
+    }
+
+    public void setTxContent(String txContent) {
+        this.txContent = txContent;
     }
 
     public String getTxid() {

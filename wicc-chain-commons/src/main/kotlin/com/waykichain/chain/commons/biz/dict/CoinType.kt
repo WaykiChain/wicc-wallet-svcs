@@ -5,5 +5,8 @@ package com.waykichain.chain.commons.biz.dict
  */
 enum class CoinType(val symbol: String, val msg: String) {
     WICC            ("WICC", "WICC"),
+    WUSD            ("WUSD", "WUSD"),
+    WGRT            ("WGRT", "WGRT"),
     WICC_FREZON     ("WICC_FREZON", "冻结WICC余额")
 }
+

@@ -12,6 +12,6 @@ import java.util.List;
 @Data
 public class WiccListTxResult {
 
-    public List<String> ConfirmTx;
-    public List<String> UnConfirmTx;
+    public List<String> confirmed_tx;
+    public List<String> unconfirmed_tx;
 }

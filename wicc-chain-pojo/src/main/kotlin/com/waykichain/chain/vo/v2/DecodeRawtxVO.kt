@@ -28,6 +28,9 @@ class DecodeRawtxVO: Serializable {
     @ApiModelProperty("交易sender的regid")
     var regid: String? = null
 
+    @ApiModelProperty("合约的regid")
+    var appuid: String? = null
+
     @ApiModelProperty("交易sender的地址")
     var addr: String? = null
 
@@ -49,4 +52,6 @@ class DecodeRawtxVO: Serializable {
     @ApiModelProperty("合约内容")
     var arguments: String? = null
 
+    @ApiModelProperty("交易备注")
+    var memo: String? = null
 }

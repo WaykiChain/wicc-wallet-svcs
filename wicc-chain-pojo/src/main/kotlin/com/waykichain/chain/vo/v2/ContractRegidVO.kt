@@ -16,4 +16,7 @@ class ContractRegidVO: Serializable {
 
     @ApiModelProperty("智能合约的regid")
     var regid: String? = null
+
+    @ApiModelProperty("智能合约的regid")
+    var regidhex: String? = null
 }

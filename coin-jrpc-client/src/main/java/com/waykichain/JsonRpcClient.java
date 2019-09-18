@@ -88,6 +88,28 @@ public class JsonRpcClient {
         return this.mapper.readValue(sb.toString(), classOut);
     }
 
+    public String execute(JsonRpcRequest dataIn) throws IOException{
+
+        String json = this.mapper.writeValueAsString(dataIn);
+        HttpPost post = new HttpPost(String.format("http://%s:%d",this.jsonRpcUrl, this.jsonRpcPort));
+        StringEntity body = new StringEntity(json);
+        post.setEntity(body);
+        if(this.isJsonFormat ) {
+            post.setHeader("Accept", "application/json");
+            post.setHeader("Content-type", "application/json");
+        }
+        log.info("request:"+json);
+        CloseableHttpResponse response = httpClient.execute(post);
+        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+        String line;
+        StringBuilder sb = new StringBuilder();
+        while ((line = rd.readLine()) != null) {
+            sb.append(line);
+        }
+
+        return sb.toString() ;
+    }
+
 
     public <U> U executeJson(Object dataIn, Class<U> classOut) throws IOException {
         String json = this.mapper.writeValueAsString(dataIn);

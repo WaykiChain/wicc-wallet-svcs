@@ -1,5 +1,6 @@
 package com.waykichain.coin.wicc.vo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -11,21 +12,24 @@ import java.util.List;
 
 @Data
 public class WiccBlockResult {
-    String hash;
+//    @JsonProperty("block_hash")
+    String block_hash;
     Integer confirmations;
     Integer size;
     Integer height;
     Integer version;
-    String merkleroot;
-    Integer txnumber;
+    String merkle_root;
+    Integer tx_count;
     List<String> tx;
     Long time;
     Long nonce;
+    String previous_block_hash;
+    String next_block_hash;
+    List<Object> median_price;
+
     String chainwork;
     Integer fuel;
     Integer fuelrate;
-    String previousblockhash;
-    String nextblockhash;
 
 
 }

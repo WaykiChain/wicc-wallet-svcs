@@ -26,7 +26,7 @@ dependencies {
     compile project(":wicc-chain-pojo")
     compile project(":wicc-chain-commons")
     compile project(":coin-jrpc-client")
-    compile 'com.waykichain:wicc-biz-redis:0.3.2-SNAPSHOT'
+    compile 'com.waykichain:wicc-biz-redis:0.3.3-SNAPSHOT'
     compile 'com.waykichain:wicc-biz-commons:0.700.332-SNAPSHOT'
 }
 

@@ -16,4 +16,5 @@ public class SendToAddressPO {
     public String recvAddress;
     public BigDecimal amount;
 
+
 }

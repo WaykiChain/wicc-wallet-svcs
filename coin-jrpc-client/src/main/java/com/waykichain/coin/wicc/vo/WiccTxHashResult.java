@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class WiccTxHashResult {
-	private String hash;
+	private String txid;
 }

@@ -42,6 +42,7 @@ class BcWiccTransactionServiceImpl: BcWiccTransactionService {
             predicate = QBcWiccTransaction.bcWiccTransaction.addr.eq(queryTransactionCond.address)
                     .or( QBcWiccTransaction.bcWiccTransaction.desaddr.eq(queryTransactionCond.address))
         }
+        if (StringUtils.isNotBlank(queryTransactionCond.coinsymbol)) predicate = predicate.and(QBcWiccTransaction.bcWiccTransaction.coinSymbol.eq(queryTransactionCond.coinsymbol))
         if(StringUtils.isNotBlank(queryTransactionCond.txtype))  predicate = predicate.and(QBcWiccTransaction.bcWiccTransaction.txType.eq(queryTransactionCond.txtype))
         val sort = Sort(Sort.Direction.DESC, "confirmedTime")
         if (null != queryTransactionCond.startNumber) {

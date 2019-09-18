@@ -139,6 +139,7 @@ enum class ErrorCode(val code: Int, val msg: String) {
     RPC_RESPONSE_IS_NULL                (9001, "rpc返回数据为空"),
     UUID_IS_USED                        (9002, "uuid已被使用"),
     GET_BLOCK_HEIGHT_FAIL               (9003, "获取区块高度失败"),
+    RPC_REQUEST_ERROR                   (9004, "JsonRpc request error!"),
 
 
 
@@ -161,8 +162,13 @@ enum class ErrorCode(val code: Int, val msg: String) {
     /**
      * get_game
      */
-    BET_GAME_CONFIG_ERROR                   (30000,"游戏配置错误");
+    BET_GAME_CONFIG_ERROR                   (30000,"游戏配置错误"),
 
+
+    /**
+     * transaction
+     */
+    TRANSACTION_NO_EXIST_IN_RPC                   (54000,"Transaction not exist.[RPC]");
 
     companion object {
 

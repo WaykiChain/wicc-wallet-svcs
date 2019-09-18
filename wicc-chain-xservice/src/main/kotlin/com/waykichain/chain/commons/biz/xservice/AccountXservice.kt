@@ -45,7 +45,7 @@ interface AccountXservice {
     /**
      * 创建离线激活账户的交易内容[RPC-genregisteraccountraw]
      */
-    fun genRegisterAccountraw(po: GenRegisterAccountrawPO): BizResponse<GenRegisterAccountrawVO>
+//    fun genRegisterAccountraw(po: GenRegisterAccountrawPO): BizResponse<GenRegisterAccountrawVO>
 
     /**
      * 将私钥（由dumpprivkey导出）导入钱包[RPC-importprivkey]

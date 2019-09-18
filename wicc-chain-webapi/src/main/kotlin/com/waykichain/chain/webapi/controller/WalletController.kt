@@ -1,9 +1,13 @@
 package com.waykichain.chain.webapi.controller
 
+import com.waykichain.chain.commons.biz.dict.TransactionConstantDict
 import com.waykichain.chain.commons.biz.xservice.BcWiccSendTransactionLogXService
 import com.waykichain.chain.commons.biz.xservice.CoinHandler
+import com.waykichain.chain.commons.biz.xservice.TransactionXService
 import com.waykichain.chain.po.*
+import com.waykichain.chain.po.v2.DepositTestMoneyPO
 import com.waykichain.chain.vo.*
+import com.waykichain.chain.vo.v2.SendtoaddressVO
 import com.waykichain.coin.wicc.vo.WiccInfoResult
 import com.waykichain.commons.base.BizResponse
 import io.swagger.annotations.Api
@@ -14,6 +18,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import sun.awt.Symbol
 import java.math.BigDecimal
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/chain")
@@ -32,11 +37,8 @@ class WalletController {
     @PostMapping("/account")
     @ApiOperation(value="Get the account info on the given address  [获取AccountInfo]", notes="[获取AccountInfo]")
     fun getAccountInfo(@RequestBody queryAccountInfoPO : QueryAccountInfoPO): BizResponse<AccountInfoVO> {
-
         val handler = CoinHandler.getHandler(com.waykichain.chain.commons.biz.dict.CoinType.WICC.symbol)
-        val accountInfoVO = handler!!.getAccountInfo(queryAccountInfoPO.address!!)
-
-        return BizResponse(accountInfoVO)
+        return handler!!.getAccountInfoWithError(queryAccountInfoPO.address!!)
     }
 
     @GetMapping("/account/{address}")
@@ -44,9 +46,7 @@ class WalletController {
     fun getAccountInfoByAddress(@PathVariable address:String): BizResponse<AccountInfoVO> {
 
         val handler = CoinHandler.getHandler(com.waykichain.chain.commons.biz.dict.CoinType.WICC.symbol)
-        val accountInfoVO = handler!!.getAccountInfo(address)
-
-        return BizResponse(accountInfoVO)
+        return handler!!.getAccountInfoWithError(address)
     }
 
     @PostMapping("/find")
@@ -63,8 +63,7 @@ class WalletController {
     fun onSubmitOfflineTransaction(@RequestBody coinOfflineTransactionPO : CoinOfflineTransactionPO): BizResponse<TxidDetailVO> {
         val handler = CoinHandler.getHandler(coinOfflineTransactionPO.symbol!!)
         val txid = handler!!.submitOfflineTransaction(coinOfflineTransactionPO)
-        val txidDetailVO = handler!!.getChainTxidInfo(txid!!)
-        return BizResponse(txidDetailVO)
+        return handler!!.getChainTxidInfo(txid!!)
 
     }
 
@@ -101,8 +100,7 @@ class WalletController {
     @ApiOperation(value="获取链账户余额", notes="获取链账户余额")
     fun onGetBalance(@RequestBody queryBalancePO : QueryBalancePO): BizResponse<BalanceVO> {
         val handler = CoinHandler.getHandler(queryBalancePO.symbol!!)
-        val balance = handler!!.getBalance(queryBalancePO.address)
-        return BizResponse(balance)
+        return handler!!.getBalance(queryBalancePO.address)
     }
 
     @PostMapping("/balanceByLog")
@@ -110,8 +108,8 @@ class WalletController {
     fun onGetBalanceByLog(@RequestBody queryBalancePO : QueryBalancePO): BizResponse<BalanceVO> {
         val handler = CoinHandler.getHandler(queryBalancePO.symbol!!)
         val balance = handler!!.getBalanceByLog(queryBalancePO.address)
-        val accountInfoVO = handler!!.getAccountInfo(queryBalancePO.address!!)
-        balance!!.regId =  accountInfoVO!!.regID
+        val accountInfoVO = handler!!.getAccountInfoWithError(queryBalancePO.address!!)?.data
+        balance!!.regId =  accountInfoVO?.regID
 
         return BizResponse(balance)
     }
@@ -138,8 +136,7 @@ class WalletController {
     @ApiOperation(value = "根据交易hash获取交易详细信息", notes = "根据交易hash获取交易详细信息")
     fun getTransactionDetailInfoByTxid(@RequestBody queryTxidInfoPO: QueryTxidInfoPO): BizResponse<TxidDetailInfoVO> {
         val handler = CoinHandler.getHandler(queryTxidInfoPO.symbol!!)
-        val txidDetailInfoVO = handler!!.getChainTxidDetailInfo(queryTxidInfoPO.txid!!)
-        return BizResponse(txidDetailInfoVO)
+        return  handler!!.getChainTxidDetailInfo(queryTxidInfoPO.txid!!)
     }
 
     /**
@@ -158,9 +155,17 @@ class WalletController {
     @ApiOperation(value = "获取所有的WICC数量", notes = "获取所有的WICC数量")
     fun getTotalCoin(@RequestBody queryTotalCoinPO: QueryTotalCoinPO): BizResponse<BigDecimal> {
         val handler = CoinHandler.getHandler(queryTotalCoinPO.symbol!!)
-        return BizResponse(handler!!.getTotalCoin())
+        return handler!!.getTotalCoin()
+    }
+
+    @GetMapping("/getcoinsfromfaucet/{address}")
+    @ApiOperation(value = "【Get 10 test coins from Testnet】【从测试网获取10个WICC测试币】", notes = "【Get 10 test coins from Testnet】【从测试网获取10个WICC测试币】")
+    fun depositTestMoneyK(@PathVariable("address") address: String): BizResponse<SendtoaddressVO> {
+        return transactionXservice.depositTestMoney(address, TransactionConstantDict.TEST_MONEY_10.value)
     }
 
     val logger = LoggerFactory.getLogger(javaClass)
     @Autowired lateinit var bcWiccSendTransactionLogXService: BcWiccSendTransactionLogXService
+
+    @Autowired lateinit var transactionXservice: TransactionXService
 }

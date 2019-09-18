@@ -3,7 +3,7 @@ package com.waykichain.coin.wicc.vo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 /** Created at 2018-08-15,
@@ -13,32 +13,39 @@ import java.util.List;
 
 @Data
 public class WiccGetTxDetailResult {
-    private String hash;
-    private String txtype;
+
+    private String txid;
+    private String tx_type;
     private Integer ver;
-    private String regid;
-    private String addr;
-    private String desregid;
-    private String desaddr;
-    private Long money;
-
+    private String tx_uid;
+    private String from_addr;
+    private String to_addr;
+    private String to_uid;
+    private Integer valid_height;
+    private Long transer_bcoins;
     private Long fees;
-    private Integer height;
     public String memo;
-    public String arguments;
-
-    private String blockhash;
-    private Integer confirmedheight;
-    private Long confirmedtime;
     private String rawtx;
+    private String tx_coin_type = "WICC";
+    private String fees_coin_type = "WICC";
+    private Integer confirmed_height;
+    private Long confirmed_time;
+    private String block_hash;
+    private Long money;
+    private String arguments;
     private String pubkey;
-    @JsonProperty("miner_pubkey")
-    private String minerpubkey;
+    private String miner_pubkey;
     private String script;
-    @JsonProperty("listOutput")
-    private List<String> listOutput;
 
-    private List<OperVoteFund> operVoteFundList;
+    private List<VoteItem> candidate_votes;
+    private List<String> list_out_put;
+
 
 }
 
+class VoteItem{
+
+    private String vote_type;
+    private String candidate_uid;
+    private Long voted_bcoins;
+}

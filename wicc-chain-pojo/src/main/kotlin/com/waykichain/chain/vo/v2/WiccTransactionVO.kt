@@ -36,7 +36,11 @@ class WiccTransactionVO: Serializable {
     var confirmedheight: Int? = null
     @ApiModelProperty("小费")
     var fees: BigDecimal? = null
-    @ApiModelProperty("非确认高度")
+    @ApiModelProperty("交易币种")
+    var coinsymbol: String? = null
+    @ApiModelProperty("小费币种")
+    var feesymbol: String? = null
+    @ApiModelProperty("提交高度")
     var height: Int? = null
     @ApiModelProperty("调用合约的参数")
     var arguments: String? = null
@@ -48,5 +52,10 @@ class WiccTransactionVO: Serializable {
     var txtype: String? = null
     @ApiModelProperty("交易流向：1-转入 2-转出")
     var trandirection: Int? = null
+    @ApiModelProperty("原始数据")
+    var txcontent: String? = null
 
 }
+
+
+

@@ -15,13 +15,13 @@ object Environment : BaseEnv() {
      * mysql config
      */
     @JvmField
-    val MYSQL_URL = env("MYSQL_URL", "jdbc:mysql://10.0.0.4:3306/wicc-chain-testnet?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false")
+    val MYSQL_URL = env("MYSQL_URL", "jdbc:mysql://10.0.0.31:3306/wicc-chain-testnet?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false")
     @JvmField
     val MYSQL_DRIVER = env("MYSQL_DRIVER", "com.mysql.jdbc.Driver")
     @JvmField
-    var MYSQL_USERNAME = env("MYSQL_USERNAME", "mysql_user")
+    var MYSQL_USERNAME = env("MYSQL_USERNAME", "wayki-rw")
     @JvmField
-    var MYSQL_PASSWORD = env("MYSQL_PASSWORD", "mysql_password")
+    var MYSQL_PASSWORD = env("MYSQL_PASSWORD", "wayiC@r19w")
 
     @JvmField
     val MYSQL_INITIALSIZE = env("MYSQL_INITIALSIZE", 10)

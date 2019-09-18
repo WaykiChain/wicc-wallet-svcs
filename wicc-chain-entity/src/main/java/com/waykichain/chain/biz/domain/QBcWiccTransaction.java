@@ -30,6 +30,10 @@ public class QBcWiccTransaction extends com.querydsl.sql.RelationalPathBase<BcWi
 
     public final NumberPath<Integer> blockNumber = createNumber("blockNumber", Integer.class);
 
+    public final NumberPath<Long> money = createNumber("money", Long.class);
+
+    public final StringPath coinSymbol = createString("coinSymbol");
+
     public final NumberPath<Long> confirmedTime = createNumber("confirmedTime", Long.class);
 
     public final NumberPath<Integer> confirmHeight = createNumber("confirmHeight", Integer.class);
@@ -44,6 +48,8 @@ public class QBcWiccTransaction extends com.querydsl.sql.RelationalPathBase<BcWi
 
     public final NumberPath<Long> fees = createNumber("fees", Long.class);
 
+    public final StringPath feeSymbol = createString("feeSymbol");
+
     public final NumberPath<Integer> height = createNumber("height", Integer.class);
 
     public final NumberPath<Integer> id = createNumber("id", Integer.class);
@@ -51,8 +57,6 @@ public class QBcWiccTransaction extends com.querydsl.sql.RelationalPathBase<BcWi
     public final StringPath listOutput = createString("listOutput");
 
     public final StringPath minerPubkey = createString("minerPubkey");
-
-    public final NumberPath<Long> money = createNumber("money", Long.class);
 
     public final StringPath operVoteFundList = createString("operVoteFundList");
 
@@ -63,6 +67,8 @@ public class QBcWiccTransaction extends com.querydsl.sql.RelationalPathBase<BcWi
     public final StringPath regid = createString("regid");
 
     public final StringPath script = createString("script");
+
+    public final StringPath txContent = createString("txContent");
 
     public final StringPath txid = createString("txid");
 
@@ -103,26 +109,29 @@ public class QBcWiccTransaction extends com.querydsl.sql.RelationalPathBase<BcWi
         addMetadata(addr, ColumnMetadata.named("addr").withIndex(8).ofType(Types.VARCHAR).withSize(64));
         addMetadata(blockHash, ColumnMetadata.named("block_hash").withIndex(3).ofType(Types.VARCHAR).withSize(64));
         addMetadata(blockNumber, ColumnMetadata.named("block_number").withIndex(2).ofType(Types.INTEGER).withSize(10));
-        addMetadata(confirmedTime, ColumnMetadata.named("confirmed_time").withIndex(20).ofType(Types.BIGINT).withSize(19));
-        addMetadata(confirmHeight, ColumnMetadata.named("confirm_height").withIndex(19).ofType(Types.INTEGER).withSize(10));
-        addMetadata(contract, ColumnMetadata.named("contract").withIndex(17).ofType(Types.LONGVARCHAR).withSize(65535));
-        addMetadata(createdAt, ColumnMetadata.named("created_at").withIndex(23).ofType(Types.TIMESTAMP).withSize(19));
+        addMetadata(money, ColumnMetadata.named("money").withIndex(13).ofType(Types.BIGINT).withSize(19));
+        addMetadata(coinSymbol, ColumnMetadata.named("coin_symbol").withIndex(15).ofType(Types.VARCHAR).withSize(32));
+        addMetadata(confirmedTime, ColumnMetadata.named("confirmed_time").withIndex(22).ofType(Types.BIGINT).withSize(19));
+        addMetadata(confirmHeight, ColumnMetadata.named("confirm_height").withIndex(21).ofType(Types.INTEGER).withSize(10));
+        addMetadata(contract, ColumnMetadata.named("contract").withIndex(19).ofType(Types.LONGVARCHAR).withSize(65535));
+        addMetadata(createdAt, ColumnMetadata.named("created_at").withIndex(26).ofType(Types.TIMESTAMP).withSize(19));
         addMetadata(desaddr, ColumnMetadata.named("desaddr").withIndex(10).ofType(Types.VARCHAR).withSize(64));
         addMetadata(descregid, ColumnMetadata.named("descregid").withIndex(9).ofType(Types.VARCHAR).withSize(64));
         addMetadata(fees, ColumnMetadata.named("fees").withIndex(14).ofType(Types.BIGINT).withSize(19));
-        addMetadata(height, ColumnMetadata.named("height").withIndex(16).ofType(Types.INTEGER).withSize(10));
+        addMetadata(feeSymbol, ColumnMetadata.named("fee_symbol").withIndex(16).ofType(Types.VARCHAR).withSize(32));
+        addMetadata(height, ColumnMetadata.named("height").withIndex(18).ofType(Types.INTEGER).withSize(10));
         addMetadata(id, ColumnMetadata.named("id").withIndex(1).ofType(Types.INTEGER).withSize(10).notNull());
-        addMetadata(listOutput, ColumnMetadata.named("list_output").withIndex(22).ofType(Types.LONGVARCHAR).withSize(65535));
+        addMetadata(listOutput, ColumnMetadata.named("list_output").withIndex(25).ofType(Types.LONGVARCHAR).withSize(65535));
         addMetadata(minerPubkey, ColumnMetadata.named("miner_pubkey").withIndex(12).ofType(Types.VARCHAR).withSize(128));
-        addMetadata(money, ColumnMetadata.named("money").withIndex(13).ofType(Types.BIGINT).withSize(19));
-        addMetadata(operVoteFundList, ColumnMetadata.named("oper_vote_fund_list").withIndex(18).ofType(Types.LONGVARCHAR).withSize(65535));
+        addMetadata(operVoteFundList, ColumnMetadata.named("oper_vote_fund_list").withIndex(20).ofType(Types.LONGVARCHAR).withSize(65535));
         addMetadata(pubkey, ColumnMetadata.named("pubkey").withIndex(11).ofType(Types.VARCHAR).withSize(128));
-        addMetadata(rawtx, ColumnMetadata.named("rawtx").withIndex(21).ofType(Types.LONGVARCHAR).withSize(16777215));
+        addMetadata(rawtx, ColumnMetadata.named("rawtx").withIndex(23).ofType(Types.LONGVARCHAR).withSize(16777215));
         addMetadata(regid, ColumnMetadata.named("regid").withIndex(7).ofType(Types.VARCHAR).withSize(64));
-        addMetadata(script, ColumnMetadata.named("script").withIndex(15).ofType(Types.LONGVARCHAR).withSize(65535));
+        addMetadata(script, ColumnMetadata.named("script").withIndex(17).ofType(Types.LONGVARCHAR).withSize(65535));
+        addMetadata(txContent, ColumnMetadata.named("tx_content").withIndex(24).ofType(Types.LONGVARCHAR).withSize(16777215));
         addMetadata(txid, ColumnMetadata.named("txid").withIndex(4).ofType(Types.VARCHAR).withSize(64));
         addMetadata(txType, ColumnMetadata.named("tx_type").withIndex(5).ofType(Types.VARCHAR).withSize(64));
-        addMetadata(updatedAt, ColumnMetadata.named("updated_at").withIndex(24).ofType(Types.TIMESTAMP).withSize(19));
+        addMetadata(updatedAt, ColumnMetadata.named("updated_at").withIndex(27).ofType(Types.TIMESTAMP).withSize(19));
         addMetadata(ver, ColumnMetadata.named("ver").withIndex(6).ofType(Types.INTEGER).withSize(10));
     }
 

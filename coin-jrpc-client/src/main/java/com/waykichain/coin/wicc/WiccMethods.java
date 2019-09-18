@@ -1,5 +1,8 @@
 package com.waykichain.coin.wicc;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
 import com.waykichain.JsonRpcClient;
 import com.waykichain.JsonRpcRequest;
 import com.waykichain.coin.wicc.po.*;
@@ -10,7 +13,12 @@ import com.waykichain.serialize.DataABIEncoder;
 import com.waykichain.utils.RandomUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.record.formula.functions.T;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -59,14 +67,14 @@ public class WiccMethods {
         return reponse;
     }
 
-    public WiccBalanceJsonRpcResponse getBalance(String address) throws Exception {
-        JsonRpcRequest request = new JsonRpcRequest();
-        request.setId(RandomUtils.generateRandomId());
-        request.setMethod(WiccOperationType.METHOD_GET_BALANCE);
-        request.getParams().add(address);
-        WiccBalanceJsonRpcResponse reponse =  this.execute(request, WiccBalanceJsonRpcResponse.class);
-        return reponse;
-    }
+//    public WiccBalanceJsonRpcResponse getBalance(String address) throws Exception {
+//        JsonRpcRequest request = new JsonRpcRequest();
+//        request.setId(RandomUtils.generateRandomId());
+//        request.setMethod(WiccOperationType.METHOD_GET_BALANCE);
+//        request.getParams().add(address);
+//        WiccBalanceJsonRpcResponse reponse =  this.execute(request, WiccBalanceJsonRpcResponse.class);
+//        return reponse;
+//    }
 
     public WiccAccountInfoJsonRpcResponse getAccountInfo(String address) throws Exception {
         JsonRpcRequest request = new JsonRpcRequest();
@@ -105,16 +113,16 @@ public class WiccMethods {
         return reponse;
     }
 
-    public WiccGenRegisterAccountrawJsonRpcResponse genRegisterAccountraw(WiccGenRegisterAccountrawPO wiccGenRegisterAccountrawPO) throws Exception {
-        JsonRpcRequest request = new JsonRpcRequest();
-        request.setId(RandomUtils.generateRandomId());
-        request.setMethod(WiccOperationType.METHOD_GEN_REGISTER_ACCOUNTRAW);
-        request.getParams().add(wiccGenRegisterAccountrawPO.getFee());
-        request.getParams().add(wiccGenRegisterAccountrawPO.getHeight());
-        request.getParams().add(wiccGenRegisterAccountrawPO.getPublickey());
-        WiccGenRegisterAccountrawJsonRpcResponse reponse =  this.execute(request, WiccGenRegisterAccountrawJsonRpcResponse.class);
-        return reponse;
-    }
+//    public WiccGenRegisterAccountrawJsonRpcResponse genRegisterAccountraw(WiccGenRegisterAccountrawPO wiccGenRegisterAccountrawPO) throws Exception {
+//        JsonRpcRequest request = new JsonRpcRequest();
+//        request.setId(RandomUtils.generateRandomId());
+//        request.setMethod(WiccOperationType.METHOD_GEN_REGISTER_ACCOUNTRAW);
+//        request.getParams().add(wiccGenRegisterAccountrawPO.getFee());
+//        request.getParams().add(wiccGenRegisterAccountrawPO.getHeight());
+//        request.getParams().add(wiccGenRegisterAccountrawPO.getPublickey());
+//        WiccGenRegisterAccountrawJsonRpcResponse reponse =  this.execute(request, WiccGenRegisterAccountrawJsonRpcResponse.class);
+//        return reponse;
+//    }
 
     public WiccImportPrivkeyJsonRpcResponse importPrivkey(ImportPrivkeyPO importPrivkeyPO) throws Exception {
         JsonRpcRequest request = new JsonRpcRequest();
@@ -144,14 +152,23 @@ public class WiccMethods {
         return reponse;
     }
 
-    public WiccGetTxDetailJsonRpcResponse getTxDetail(String tx) throws Exception {
+    public String getTxDetailJson(String txHash) throws Exception{
+
         JsonRpcRequest request = new JsonRpcRequest();
         request.setId(RandomUtils.generateRandomId());
         request.setMethod(WiccOperationType.METHOD_GET_TX_DETAIL);
-        request.getParams().add(tx);
-        WiccGetTxDetailJsonRpcResponse reponse =  this.execute(request, WiccGetTxDetailJsonRpcResponse.class);
-        return reponse;
+        request.getParams().add(txHash);
+        return this.execute(request);
     }
+
+//    public WiccGetTxDetailJsonRpcResponse getTxDetail(String tx) throws Exception {
+//        JsonRpcRequest request = new JsonRpcRequest();
+//        request.setId(RandomUtils.generateRandomId());
+//        request.setMethod(WiccOperationType.METHOD_GET_TX_DETAIL);
+//        request.getParams().add(tx);
+//        WiccGetTxDetailJsonRpcResponse reponse =  this.execute(request, WiccGetTxDetailJsonRpcResponse.class);
+//        return reponse;
+//    }
 
     public WiccBlockJsonRpcResponse getBlock(Integer blockId) throws Exception {
         JsonRpcRequest request = new JsonRpcRequest();
@@ -182,59 +199,60 @@ public class WiccMethods {
         return this.execute(request,WiccGetBlockHashJsonRpcResponse.class);
     }
 
-    public WiccSubmitTxJsonRpcResponse sendToAddress(SendToAddressPO sendToAddressPO) throws Exception {
+    public WiccSubmitTxJsonRpcResponse sendToAddress(SendTxPO sendTxPO) throws Exception {
         JsonRpcRequest request = new JsonRpcRequest();
         request.setId(RandomUtils.generateRandomId());
-        request.setMethod(WiccOperationType.METHOD_SEND_TO_ADDRESS);
-        request.getParams().add(sendToAddressPO.sendAddress);
-        request.getParams().add(sendToAddressPO.recvAddress);
-        request.getParams().add(sendToAddressPO.amount);
+        request.setMethod(WiccOperationType.METHOD_SUBMIT_SEND_TX);
+        request.getParams().add(sendTxPO.sendAddress);
+        request.getParams().add(sendTxPO.receiveAddress);
+        request.getParams().add(sendTxPO.coinSymbol+":"+sendTxPO.amount.toString()+":"+sendTxPO.unit);
+        request.getParams().add(sendTxPO.feeSymbol+":"+sendTxPO.fee.toString()+":"+sendTxPO.unit);
         WiccSubmitTxJsonRpcResponse reponse =  this.execute(request, WiccSubmitTxJsonRpcResponse.class);
         return reponse;
     }
 
-    public WiccRawTxJsonRpcResponse sendToAddressRaw(SendToAddressRawPO sendToAddressRawPO)throws Exception{
-        JsonRpcRequest request = new JsonRpcRequest();
-        request.setId(RandomUtils.generateRandomId());
-        request.setMethod(WiccOperationType.METHOD_SEND_TO_ADDRESS_RAW);
-        request.getParams().add(sendToAddressRawPO.getFee());
-        request.getParams().add(sendToAddressRawPO.getAmount());
-        request.getParams().add(sendToAddressRawPO.getSrcaddress());
-        request.getParams().add(sendToAddressRawPO.getRecvaddress());
-        request.getParams().add(sendToAddressRawPO.getHeight());
-        WiccRawTxJsonRpcResponse reponse =  this.execute(request, WiccRawTxJsonRpcResponse.class);
-        return reponse;
-    }
+//    public WiccRawTxJsonRpcResponse sendToAddressRaw(SendToAddressRawPO sendToAddressRawPO)throws Exception{
+//        JsonRpcRequest request = new JsonRpcRequest();
+//        request.setId(RandomUtils.generateRandomId());
+//        request.setMethod(WiccOperationType.METHOD_SEND_TO_ADDRESS_RAW);
+//        request.getParams().add(sendToAddressRawPO.getFee());
+//        request.getParams().add(sendToAddressRawPO.getAmount());
+//        request.getParams().add(sendToAddressRawPO.getSrcaddress());
+//        request.getParams().add(sendToAddressRawPO.getRecvaddress());
+//        request.getParams().add(sendToAddressRawPO.getHeight());
+//        WiccRawTxJsonRpcResponse reponse =  this.execute(request, WiccRawTxJsonRpcResponse.class);
+//        return reponse;
+//    }
 
-    public WiccSendToAddressWithFeeJsonRpcResponse sendToAddressWithFee(SendToAddressWithFeePO sendToAddressWithFeePO)throws Exception{
+    public WiccSendToAddressWithFeeJsonRpcResponse sendToAddressWithFee(SendTxPO sendTxPO)throws Exception{
         JsonRpcRequest request = new JsonRpcRequest();
         request.setId(RandomUtils.generateRandomId());
-        request.setMethod(WiccOperationType.METHOD_SEND_TO_ADDRESS_WITH_FEE);
-        request.getParams().add(sendToAddressWithFeePO.getSender());
-        request.getParams().add(sendToAddressWithFeePO.getRecviver());
-        request.getParams().add(sendToAddressWithFeePO.getAmount());
-        request.getParams().add(sendToAddressWithFeePO.getFee());
+        request.setMethod(WiccOperationType.METHOD_SUBMIT_SEND_TX);
+        request.getParams().add(sendTxPO.sendAddress);
+        request.getParams().add(sendTxPO.receiveAddress);
+        request.getParams().add(sendTxPO.coinSymbol+":"+sendTxPO.amount.toString()+":"+sendTxPO.unit);
+        request.getParams().add(sendTxPO.feeSymbol+":"+sendTxPO.fee.toString()+":"+sendTxPO.unit);
         WiccSendToAddressWithFeeJsonRpcResponse reponse =  this.execute(request, WiccSendToAddressWithFeeJsonRpcResponse.class);
         return reponse;
     }
 
-    public WiccGenSendtoAddressTxrawJsonRpcResponse genSendtoAddresstxraw(GenSendToAddressTxRawPO genSendToAddressTxRawPO)throws Exception{
-        JsonRpcRequest request = new JsonRpcRequest();
-        request.setId(RandomUtils.generateRandomId());
-        request.setMethod(WiccOperationType.METHOD_SEND_TO_ADDRESS_RAW);
-        request.getParams().add(genSendToAddressTxRawPO.getSender());
-        request.getParams().add(genSendToAddressTxRawPO.getRecviver());
-        request.getParams().add(genSendToAddressTxRawPO.getAmount());
-        request.getParams().add(genSendToAddressTxRawPO.getFee());
-        request.getParams().add(genSendToAddressTxRawPO.getHeight());
-        WiccGenSendtoAddressTxrawJsonRpcResponse reponse =  this.execute(request, WiccGenSendtoAddressTxrawJsonRpcResponse.class);
-        return reponse;
-    }
+//    public WiccGenSendtoAddressTxrawJsonRpcResponse genSendtoAddresstxraw(GenSendToAddressTxRawPO genSendToAddressTxRawPO)throws Exception{
+//        JsonRpcRequest request = new JsonRpcRequest();
+//        request.setId(RandomUtils.generateRandomId());
+//        request.setMethod(WiccOperationType.METHOD_SEND_TO_ADDRESS_RAW);
+//        request.getParams().add(genSendToAddressTxRawPO.getSender());
+//        request.getParams().add(genSendToAddressTxRawPO.getRecviver());
+//        request.getParams().add(genSendToAddressTxRawPO.getAmount());
+//        request.getParams().add(genSendToAddressTxRawPO.getFee());
+//        request.getParams().add(genSendToAddressTxRawPO.getHeight());
+//        WiccGenSendtoAddressTxrawJsonRpcResponse reponse =  this.execute(request, WiccGenSendtoAddressTxrawJsonRpcResponse.class);
+//        return reponse;
+//    }
 
     public WiccDecodeRawTxJsonRpcResponse decodeRawtx(DecodeRawTxPO decodeRawTxPO)throws Exception{
         JsonRpcRequest request = new JsonRpcRequest();
         request.setId(RandomUtils.generateRandomId());
-        request.setMethod(WiccOperationType.METHOD_DECODE_RAW_TX);
+        request.setMethod(WiccOperationType.METHOD_DECODE_TX_RAW);
         request.getParams().add(decodeRawTxPO.getHexstring());
         WiccDecodeRawTxJsonRpcResponse reponse =  this.execute(request, WiccDecodeRawTxJsonRpcResponse.class);
         return reponse;
@@ -251,7 +269,7 @@ public class WiccMethods {
     public WiccSubmitTxJsonRpcResponse submitTx(String tx) throws Exception {
         JsonRpcRequest request = new JsonRpcRequest();
         request.setId(RandomUtils.generateRandomId());
-        request.setMethod(WiccOperationType.METHOD_SUBMIT_TX);
+        request.setMethod(WiccOperationType.METHOD_SUBMIT_TX_RAW);
         request.getParams().add(tx);
         WiccSubmitTxJsonRpcResponse reponse =  this.execute(request, WiccSubmitTxJsonRpcResponse.class);
         return reponse;
@@ -296,19 +314,19 @@ public class WiccMethods {
     	return response;
     }
 
-    public WiccRawTxJsonRpcResponse createContractTxRaw(CreateContractTxRawPO createContractTxRawPO) throws Exception{
-        JsonRpcRequest request = new JsonRpcRequest();
-        request.setId(RandomUtils.generateRandomId());
-        request.setMethod(WiccOperationType.METHOD_CREATE_CONTRACT_TX_RAW);
-        request.getParams().add(createContractTxRawPO.getFee());
-        request.getParams().add(createContractTxRawPO.getAmount());
-        request.getParams().add(createContractTxRawPO.getAddr());
-        request.getParams().add(createContractTxRawPO.getAppid());
-        request.getParams().add(createContractTxRawPO.getContract());
-        request.getParams().add(createContractTxRawPO.getHeight());
-        WiccRawTxJsonRpcResponse response =  this.execute(request, WiccRawTxJsonRpcResponse.class);
-        return response;
-    }
+//    public WiccRawTxJsonRpcResponse createContractTxRaw(CreateContractTxRawPO createContractTxRawPO) throws Exception{
+//        JsonRpcRequest request = new JsonRpcRequest();
+//        request.setId(RandomUtils.generateRandomId());
+//        request.setMethod(WiccOperationType.METHOD_CREATE_CONTRACT_TX_RAW);
+//        request.getParams().add(createContractTxRawPO.getFee());
+//        request.getParams().add(createContractTxRawPO.getAmount());
+//        request.getParams().add(createContractTxRawPO.getAddr());
+//        request.getParams().add(createContractTxRawPO.getAppid());
+//        request.getParams().add(createContractTxRawPO.getContract());
+//        request.getParams().add(createContractTxRawPO.getHeight());
+//        WiccRawTxJsonRpcResponse response =  this.execute(request, WiccRawTxJsonRpcResponse.class);
+//        return response;
+//    }
 
     public WiccGetScriptDataJsonRpcResponse getScriptData(GetContractDataPO getContractDataPO) throws Exception{
         JsonRpcRequest request = new JsonRpcRequest();
@@ -320,15 +338,15 @@ public class WiccMethods {
         return response;
     }
 
-    public WiccGetScriptDataJsonRpcResponse getContractDataRaw(GetContractDataPO getContractDataPO) throws Exception{
-        JsonRpcRequest request = new JsonRpcRequest();
-        request.setId(RandomUtils.generateRandomId());
-        request.setMethod(WiccOperationType.METHOD_GET_CONTRACT_DATA_RAW);
-        request.getParams().add(getContractDataPO.getContractRegid());
-        request.getParams().add(getContractDataPO.getKey());
-        WiccGetScriptDataJsonRpcResponse response =this.execute(request, WiccGetScriptDataJsonRpcResponse.class);
-        return response;
-    }
+//    public WiccGetScriptDataJsonRpcResponse getContractDataRaw(GetContractDataPO getContractDataPO) throws Exception{
+//        JsonRpcRequest request = new JsonRpcRequest();
+//        request.setId(RandomUtils.generateRandomId());
+//        request.setMethod(WiccOperationType.METHOD_GET_CONTRACT_DATA_RAW);
+//        request.getParams().add(getContractDataPO.getContractRegid());
+//        request.getParams().add(getContractDataPO.getKey());
+//        WiccGetScriptDataJsonRpcResponse response =this.execute(request, WiccGetScriptDataJsonRpcResponse.class);
+//        return response;
+//    }
 
     public WiccGetContractInfoJsonRpcResponse getContractInfo(GetContractInfoPO po) throws Exception{
         JsonRpcRequest request = new JsonRpcRequest();
@@ -384,6 +402,206 @@ public class WiccMethods {
         return this.execute(request, WiccTotalCoinJsonRpcResponse.class);
     }
 
+//    public List<GetTxReceiptResult> getTxReceipt(String txid ) throws  Exception{
+//
+//        JsonRpcRequest request = new JsonRpcRequest();
+//        request.setId(RandomUtils.generateRandomId());
+//        request.setMethod(WiccOperationType.METHOD_GET_TX_RECEIPT);
+//        request.getParams().add(txid) ;
+//
+//        List<GetTxReceiptResult> receiptList  = new ArrayList<>() ;
+//        String re = this.execute(request) ;
+//
+//        JSONObject jsonObject = JSONObject.parseObject(re) ;
+//        if( jsonObject == null ){
+//            return receiptList ;
+//        }
+//
+//        JSONArray receiptArray = jsonObject.getJSONArray("result") ;
+//        if( receiptArray == null ){
+//            return receiptList ;
+//        }
+//
+//        List<GetTxReceiptResult> results = receiptArray.toJavaList(GetTxReceiptResult.class) ;
+//
+//        if (results != null) {
+//            return results;
+//        } else {
+//            return receiptList ;
+//        }
+//
+//
+//    }
+
+    /**
+     * dex
+     */
+    public DefaultSubmitTxResponse submitDexBuyLimitOrderTx( SubmitDexBuyLimitOrderPO po) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(RandomUtils.generateRandomId());
+        request.setMethod(WiccOperationType.METHOD_SUBMIT_DEX_BUY_LIMIT_ORDER_TX);
+        request.getParams().add(po.getAddress()) ;
+        request.getParams().add(po.getCoinType()) ;
+        request.getParams().add(po.getAssetType()) ;
+        request.getParams().add(po.getAssetAmount()) ;
+        request.getParams().add(po.getPrice()) ;
+        request.getParams().add(po.getFee()) ;
+        return this.execute(request, DefaultSubmitTxResponse.class) ;
+
+    }
+
+
+    public DefaultSubmitTxResponse submitDexSellLimitOrderTx( SubmitDexSellLimitOrderPO po) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(RandomUtils.generateRandomId());
+        request.setMethod(WiccOperationType.METHOD_SUBMIT_DEX_SELL_LIMIT_ORDER_TX);
+        request.getParams().add(po.getAddress()) ;
+        request.getParams().add(po.getCoinType()) ;
+        request.getParams().add(po.getAssetType()) ;
+        request.getParams().add(po.getAssetAmount()) ;
+        request.getParams().add(po.getPrice()) ;
+        request.getParams().add(po.getFee()) ;
+        return this.execute(request, DefaultSubmitTxResponse.class) ;
+
+    }
+
+    public DefaultSubmitTxResponse submitDexBuyMarketOrderTx( SubmitDexBuyMarketOrderPO po) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(RandomUtils.generateRandomId());
+        request.setMethod(WiccOperationType.METHOD_SUBMIT_DEX_BUY_MARKET_ORDER_TX);
+        request.getParams().add(po.getAddress()) ;
+        request.getParams().add(po.getCoinType()) ;
+        request.getParams().add(po.getAssetType()) ;
+        request.getParams().add(po.getCoinAmount()) ;
+
+        request.getParams().add(po.getFee()) ;
+        return this.execute(request, DefaultSubmitTxResponse.class) ;
+
+    }
+
+    public DefaultSubmitTxResponse submitDexSellMarketOrderTx( SubmitDexSellMarketOrderPO po) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(RandomUtils.generateRandomId());
+        request.setMethod(WiccOperationType.METHOD_SUBMIT_DEX_SELL_MARKET_ORDER_TX);
+        request.getParams().add(po.getAddress()) ;
+        request.getParams().add(po.getCoinType()) ;
+        request.getParams().add(po.getAssetType()) ;
+        request.getParams().add(po.getAssetAmount()) ;
+        request.getParams().add(po.getFee()) ;
+        return this.execute(request, DefaultSubmitTxResponse.class) ;
+
+    }
+
+
+    public DefaultSubmitTxResponse submitDexCancelOrderTx(SubmitDexCancelOrderTxPO po) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(RandomUtils.generateRandomId());
+        request.setMethod(WiccOperationType.METHOD_SUBMIT_DEX_CANCEL_ORDER_TX);
+
+        request.getParams().add(po.getAddress()) ;
+        request.getParams().add(po.getTxid()) ;
+        request.getParams().add(po.getFee()) ;
+
+        return this.execute(request,DefaultSubmitTxResponse.class) ;
+    }
+
+    public GetDexSysOrdersJsonRpcResponse getDexsysorders(Long height) throws Exception {
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(RandomUtils.generateRandomId());
+        request.setMethod(WiccOperationType.METHOD_GET_DEX_SYS_ORDERS);
+        request.getParams().add(height) ;
+        return this.execute(request,GetDexSysOrdersJsonRpcResponse.class) ;
+    }
+
+    public DefaultSubmitTxResponse submitDexSettleTx(SubmitDexSettleTxPO po) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(RandomUtils.generateRandomId());
+        request.setMethod(WiccOperationType.METHOD_SUBMIT_DEX_SETTLE_TX);
+        request.getParams().add(po.getSettlerAddress()) ;
+        request.getParams().add(po.getDealItems()) ;
+        request.getParams().add(po.getFee()) ;
+        return this.execute(request, DefaultSubmitTxResponse.class) ;
+    }
+
+    public WiccGetScoinInfoJsonRpcResponse getSCoinInfo() throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setMethod(WiccOperationType.METHOD_GET_SCOIN_INFO);
+        return this.execute(request, WiccGetScoinInfoJsonRpcResponse.class);
+    }
+
+    /**
+     * cdp
+     */
+    public CdpInfoJsonRpcResponse getCdpInfo(String cdpid) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setMethod(WiccOperationType.METHOD_CDP_GET_INFO);
+        request.getParams().add(cdpid);
+        return this.execute(request, CdpInfoJsonRpcResponse.class);
+    }
+
+    public UserCdpJsonRpcResponse getUserCdp(String address) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setMethod(WiccOperationType.METHOD_CDP_USER_CDP);
+        request.getParams().add(address);
+        return this.execute(request, UserCdpJsonRpcResponse.class);
+    }
+
+    public CdpStakeJsonRpcResponse submitStakeCdpTx(CdpTxPO po) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setMethod(WiccOperationType.METHOD_CDP_SUBMIT_STAKE_TX);
+        request.getParams().add(po.getAddress());
+        request.getParams().add(po.getStakecombomoney());
+        request.getParams().add(po.getMintcombomoney());
+        if (StringUtils.isNotBlank(po.getCdpid())) { request.getParams().add(po.getCdpid()); }
+        if (StringUtils.isNotBlank(po.getFee())) { request.getParams().add(po.getFee()); }
+        return this.execute(request, CdpStakeJsonRpcResponse.class);
+    }
+
+    public CdpRedeemJsonRpcResponse submitRedeemCdpTx(CdpTxPO po) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setMethod(WiccOperationType.METHOD_CDP_SUBMIT_REDEEM_TX);
+        request.getParams().add(po.getAddress());
+        request.getParams().add(po.getCdpid());
+        request.getParams().add(po.getRepayamount());
+        request.getParams().add(po.getRedeemamount());
+        if (StringUtils.isNotBlank(po.getFee())) { request.getParams().add(po.getFee()); }
+        return this.execute(request, CdpRedeemJsonRpcResponse.class);
+    }
+
+    public CdpLiquidateJsonRpcResponse submitLiquidateCdpTx(CdpTxPO po) throws Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setMethod(WiccOperationType.METHOD_CDP_SUBMIT_LIQUIDATE_TX);
+        request.getParams().add(po.getAddress());
+        request.getParams().add(po.getCdpid());
+        request.getParams().add(po.getLiquidateamount());
+        if (StringUtils.isNotBlank(po.getFee())) { request.getParams().add(po.getFee()); }
+        return this.execute(request, CdpLiquidateJsonRpcResponse.class);
+    }
+
+    public GetMedianPriceJsonRpcResponse getMedianPrice(GetMedianPricePO po) throws  Exception{
+
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(RandomUtils.generateRandomId());
+        request.setMethod(WiccOperationType.METHOD_GET_MEDIAN_PRICE);
+        request.getParams().add(po.getCoinType()) ;
+        request.getParams().add(po.getPriceType());
+        if(po.getHeight() != null &&po.getHeight() !=0){
+            request.getParams().add(po.getHeight()) ;
+        }
+        return this.execute(request, GetMedianPriceJsonRpcResponse.class) ;
+    }
+
+
+    public DefaultSubmitTxResponse submitPriceFeedTx(PriceFeedPO po) throws  Exception{
+        JsonRpcRequest request = new JsonRpcRequest();
+        request.setId(RandomUtils.generateRandomId());
+        request.setMethod(WiccOperationType.METHOD_SUBMIT_PRICE_FEED_TX);
+        request.getParams().add(po.getFeederAddress()) ;
+        request.getParams().add(po.getPriceFeeds()) ;
+        request.getParams().add(po.getFee()) ;
+        return this.execute(request, DefaultSubmitTxResponse.class) ;
+    }
+
     private <T> T execute(final JsonRpcRequest request, final Class<T> classTypeResponse) throws Exception {
         T response = null;
         try {
@@ -398,4 +616,16 @@ public class WiccMethods {
         return response;
     }
 
+    private String execute(final JsonRpcRequest request) throws Exception {
+
+        try {
+
+            return this.rpcClient.execute(request);
+
+        } catch (IOException ioExc) {
+            log.error("Error calling method {}", request.getMethod(), ioExc);
+            ioExc.printStackTrace();
+            throw new Exception();
+        }
+    }
 }

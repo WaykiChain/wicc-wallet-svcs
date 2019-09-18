@@ -9,5 +9,5 @@ import lombok.Data;
  */
 @Data
 public class WiccValidateAddrResult {
-    private boolean ret;
+    private boolean is_valid;
 }

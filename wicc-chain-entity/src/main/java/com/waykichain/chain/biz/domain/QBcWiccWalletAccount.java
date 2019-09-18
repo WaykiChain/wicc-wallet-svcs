@@ -26,6 +26,8 @@ public class QBcWiccWalletAccount extends com.querydsl.sql.RelationalPathBase<Bc
 
     public final StringPath address = createString("address");
 
+    public final StringPath assetsTokens = createString("assetsTokens");
+
     public final NumberPath<Long> balance = createNumber("balance", Long.class);
 
     public final StringPath coinSymbol = createString("coinSymbol");
@@ -71,14 +73,15 @@ public class QBcWiccWalletAccount extends com.querydsl.sql.RelationalPathBase<Bc
 
     public void addMetadata() {
         addMetadata(address, ColumnMetadata.named("address").withIndex(2).ofType(Types.VARCHAR).withSize(64));
+        addMetadata(assetsTokens, ColumnMetadata.named("assets_tokens").withIndex(6).ofType(Types.VARCHAR).withSize(256));
         addMetadata(balance, ColumnMetadata.named("balance").withIndex(5).ofType(Types.BIGINT).withSize(19));
         addMetadata(coinSymbol, ColumnMetadata.named("coin_symbol").withIndex(4).ofType(Types.VARCHAR).withSize(32));
-        addMetadata(createdAt, ColumnMetadata.named("created_at").withIndex(8).ofType(Types.TIMESTAMP).withSize(19));
-        addMetadata(desc, ColumnMetadata.named("desc").withIndex(7).ofType(Types.VARCHAR).withSize(128));
+        addMetadata(createdAt, ColumnMetadata.named("created_at").withIndex(9).ofType(Types.TIMESTAMP).withSize(19));
+        addMetadata(desc, ColumnMetadata.named("desc").withIndex(8).ofType(Types.VARCHAR).withSize(128));
         addMetadata(id, ColumnMetadata.named("id").withIndex(1).ofType(Types.BIGINT).withSize(20).notNull());
-        addMetadata(memo, ColumnMetadata.named("memo").withIndex(6).ofType(Types.VARCHAR).withSize(512));
+        addMetadata(memo, ColumnMetadata.named("memo").withIndex(7).ofType(Types.VARCHAR).withSize(512));
         addMetadata(type, ColumnMetadata.named("type").withIndex(3).ofType(Types.INTEGER).withSize(10));
-        addMetadata(updatedAt, ColumnMetadata.named("updated_at").withIndex(9).ofType(Types.TIMESTAMP).withSize(19));
+        addMetadata(updatedAt, ColumnMetadata.named("updated_at").withIndex(10).ofType(Types.TIMESTAMP).withSize(19));
     }
 
 }

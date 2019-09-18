@@ -5,6 +5,7 @@ import com.waykichain.chain.po.*
 import com.waykichain.chain.vo.*
 import com.waykichain.coin.wicc.po.CreateContractPO
 import com.waykichain.coin.wicc.vo.WiccInfoJsonRpcResponse
+import com.waykichain.commons.base.BizResponse
 import java.math.BigDecimal
 
 /**
@@ -35,11 +36,11 @@ abstract class CoinHandler {
 
     abstract fun getTxidInfo(queryTxidInfoPO: QueryTxidInfoPO): TxidVO?
 
-    abstract fun getChainTxidInfo(txid:String): TxidDetailVO
+    abstract fun getChainTxidInfo(txid:String): BizResponse<TxidDetailVO>
 
     abstract fun composed()
 
-    abstract fun getBalance(address: String?): BalanceVO?
+    abstract fun getBalance(address: String?): BizResponse<BalanceVO>
 
     abstract fun getBalanceByLog(address: String?): BalanceVO?
 
@@ -49,10 +50,11 @@ abstract class CoinHandler {
 
     abstract fun getAccountInfo(address:String): AccountInfoVO?
 
+    abstract fun getAccountInfoWithError(address: String): BizResponse<AccountInfoVO>
 
     abstract fun getChainInfo(): WiccInfoJsonRpcResponse?
 
-    abstract fun getChainTxidDetailInfo(txid: String) : TxidDetailInfoVO?
+    abstract fun getChainTxidDetailInfo(txid: String) : BizResponse<TxidDetailInfoVO>
 
     abstract fun registerAccountTx(queryAccountInfoPO: QueryAccountInfoPO) : String?
 
@@ -62,10 +64,12 @@ abstract class CoinHandler {
 
     abstract fun getBlockCount(): Long?
 
-    abstract fun getTotalCoin(): BigDecimal?
+    abstract fun getTotalCoin(): BizResponse<BigDecimal>
 
     abstract fun getBlockByHeight(height: Int): BcWiccBlock
 
     abstract fun checkRollback()
+
+    abstract fun checkChainStop(): Boolean
 
 }

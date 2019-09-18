@@ -12,27 +12,31 @@ import java.math.BigDecimal;
 @Data
 public class WiccDecodeRawTxResult {
 
-    private String hash;
+    private String txid;
 
-    private String txtype;
+    private String tx_type;
 
     private int ver;
 
-    private String regid;
+    private String tx_uid;
 
-    private String addr;
+    private String from_addr;
 
-    private String desregid;
+    private String to_uid;
 
-    private String desaddr;
+    private String app_uid;
 
-    private BigDecimal money;
+    private String to_addr;
+
+    private BigDecimal coin_amount;
 
     private BigDecimal fees;
 
-    private Long height;
-
-    private String contract;
+    private Long valid_height;
 
     private String arguments;
+
+    private String memo;
+
+
 }

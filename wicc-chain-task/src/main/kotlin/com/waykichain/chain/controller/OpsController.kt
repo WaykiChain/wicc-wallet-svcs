@@ -2,6 +2,7 @@ package com.waykichain.chain.controller
 
 import com.waykichain.chain.commons.biz.xservice.CoinHandler
 import com.waykichain.chain.commons.biz.xservice.DingTalkService
+import com.waykichain.chain.task.notify.ChainStopSynchronizeNotifyHandler
 import com.waykichain.chain.task.notify.LargeTransactionNotifyHandler
 import com.waykichain.chain.task.notify.LargeBalanceNotifyHandler
 import com.waykichain.chain.task.notify.RollbackNotifyHandler
@@ -58,9 +59,17 @@ class OpsController {
         return "Rollback scan Success"
     }
 
+    @GetMapping("/check/chainstop")
+    fun chainStopCheck():String?{
+        println("-----------------on Rollbacn Scan------------------")
+        chainStopSynchronizeNotifyHandler.checkChainStop()
+        return "Check chain stop"
+    }
+
     @Autowired lateinit var dingTalkService:DingTalkService
     @Autowired lateinit var largeTransactionNotifyHandler: LargeTransactionNotifyHandler
     @Autowired lateinit var largeBalanceNotifyHandler: LargeBalanceNotifyHandler
     @Autowired lateinit var rollbackNotifyHandler:RollbackNotifyHandler
+    @Autowired lateinit var chainStopSynchronizeNotifyHandler:ChainStopSynchronizeNotifyHandler
     private val logger = LoggerFactory.getLogger(javaClass)
 }

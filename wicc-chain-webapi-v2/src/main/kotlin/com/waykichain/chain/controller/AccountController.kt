@@ -47,14 +47,14 @@ class AccountController {
         return accountXservice.validateAddress(po)
     }
 
-    @PostMapping("/genregisteraccountraw")
-    @ApiOperation(value="【Generate signature for register account】【创建激活账户交易的签名】",
-            notes="Please ensure that there is a corresponding private key in the Baas wallet node  \n" +
-                    "请确保Baas钱包节点中存在激活者私钥",
-            httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE)
-    fun genRegisterAccountraw(@RequestBody @Valid po: GenRegisterAccountrawPO): BizResponse<GenRegisterAccountrawVO> {
-        return accountXservice.genRegisterAccountraw(po)
-    }
+//    @PostMapping("/genregisteraccountraw")
+//    @ApiOperation(value="【Generate signature for register account】【创建激活账户交易的签名】",
+//            notes="Please ensure that there is a corresponding private key in the Baas wallet node  \n" +
+//                    "请确保Baas钱包节点中存在激活者私钥",
+//            httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE)
+//    fun genRegisterAccountraw(@RequestBody @Valid po: GenRegisterAccountrawPO): BizResponse<GenRegisterAccountrawVO> {
+//        return accountXservice.genRegisterAccountraw(po)
+//    }
 
     @PostMapping("/importprivkey")
     @ApiOperation(value="【Import the private key into the Baas background wallet】【将私钥导入Baas后台钱包】",

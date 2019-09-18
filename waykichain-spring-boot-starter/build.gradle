@@ -12,8 +12,6 @@ dependencies {
     compile project(":wicc-chain-pojo")
 }
 
-
-
 uploadArchives {
     repositories {
         mavenDeployer {

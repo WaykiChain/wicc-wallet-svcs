@@ -1,9 +1,11 @@
 package com.waykichain.chain.controller
 
 import com.waykichain.chain.commons.biz.dict.TransactionConstantDict
+import com.waykichain.chain.commons.biz.xservice.CdpXService
 import com.waykichain.chain.commons.biz.xservice.TransactionXService
 import com.waykichain.chain.po.v2.*
 import com.waykichain.chain.vo.v2.*
+import com.waykichain.coin.wicc.vo.tx.BaseTxDetailVO
 import com.waykichain.commons.base.BizResponse
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
@@ -59,6 +61,24 @@ class TransactionController {
         return transactionXservice.getTranDetailFromRPC(po.hash!!)
     }
 
+
+    @PostMapping("/gettxdetailjson")
+    @ApiOperation(value = "【Get transaction details based on transaction hash】【根据交易哈希获取交易详情】",
+            notes = "",
+            httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE)
+    fun getTxDetailJson(@RequestBody @Valid po: WiccTransactionDetailPO): BizResponse<String> {
+        return transactionXservice.getTxDetailOriginalJson(po.hash!!)
+    }
+
+    @PostMapping("/gettxdetailplus")
+    @ApiOperation(value = "【Get transaction details based on transaction hash】【根据交易哈希获取交易详情】",
+            notes = "",
+            httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE)
+    fun getTxDetailPlus(@RequestBody @Valid po: WiccTransactionDetailPO): BizResponse<BaseTxDetailVO> {
+        return transactionXservice.getTranDetailFromRpcPlus(po.hash!!)
+    }
+
+
     @PostMapping("/sendtoaddress")
     @ApiOperation(value = "【Common transfer 】【普通转账】",
             notes = "Please ensure that there is a corresponding private key in the Baas wallet node  \n" +
@@ -77,14 +97,14 @@ class TransactionController {
         return transactionXservice.sendtoaddressWithFee(po)
     }
 
-    @PostMapping("/gensendtoaddressraw")
-    @ApiOperation(value = "【Generate a transfer transaction signature】【创建转账交易签名】",
-            notes = "Please ensure that there is a corresponding private key in the Baas wallet node  \n" +
-                    "请确保Baas钱包节点中存在发送者私钥",
-            httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE)
-    fun genSendtoAddresstxraw(@RequestBody @Valid po: GenSendToAddressTxrawPO): BizResponse<GenSendToAddressTxrawVO> {
-        return transactionXservice.genSendtoAddresstxraw(po)
-    }
+//    @PostMapping("/gensendtoaddressraw")
+//    @ApiOperation(value = "【Generate a transfer transaction signature】【创建转账交易签名】",
+//            notes = "Please ensure that there is a corresponding private key in the Baas wallet node  \n" +
+//                    "请确保Baas钱包节点中存在发送者私钥",
+//            httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE)
+//    fun genSendtoAddresstxraw(@RequestBody @Valid po: GenSendToAddressTxrawPO): BizResponse<GenSendToAddressTxrawVO> {
+//        return transactionXservice.genSendtoAddresstxraw(po)
+//    }
 
     @PostMapping("/listtx")
     @ApiOperation(value = "【Get the list of transactions in the remote wallet node】【获取远程钱包节点中的交易列表】",
@@ -102,7 +122,7 @@ class TransactionController {
         return transactionXservice.decodeRawtx(po)
     }
 
-    @PostMapping("/sendrawtx")
+    @PostMapping("/sendtxraw")
     @ApiOperation(value = "【Broadcast transaction signature data to blockchain】【将交易签名数据广播至区块链】",
             notes = "",
             httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -118,7 +138,17 @@ class TransactionController {
         return transactionXservice.depositTestMoney(po.recviver!!, TransactionConstantDict.TEST_MONEY_10.value)
     }
 
-//   @PostMapping("/depositTestMoneyW")
+
+    @PostMapping("/submitstakecdptx")
+    @ApiOperation(value = "【Cdp stake】【Cdp抵押】",
+            notes = "",
+            httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE)
+    fun cdpStake(@RequestBody @Valid po: CdpStakeTxPO): BizResponse<CdpStakeTxVO> {
+        return cdpXService.cdpStake(po)
+    }
+
+
+//    @PostMapping("/depositTestMoneyW")
 //    @ApiOperation(value = "添加测试金额（10000wicc）", notes = "添加测试金额（10000wicc）", httpMethod = "POST", produces = MediaType.APPLICATION_JSON_VALUE)
 //    fun depositTestMoneyW(@RequestBody @Valid po: DepositTestMoneyPO): BizResponse<SendtoaddressVO> {
 //        return transactionXservice.depositTestMoney(po.recviver!!, TransactionConstantDict.TEST_MONEY_10000.value)
@@ -128,5 +158,8 @@ class TransactionController {
 
     @Autowired
     lateinit var transactionXservice: TransactionXService
+
+    @Autowired
+    lateinit var cdpXService: CdpXService
 
 }

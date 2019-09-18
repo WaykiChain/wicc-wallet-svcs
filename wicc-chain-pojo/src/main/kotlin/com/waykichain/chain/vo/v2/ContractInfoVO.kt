@@ -14,6 +14,9 @@ import java.io.Serializable
  */
 class ContractInfoVO : Serializable {
 
+    @ApiModelProperty("智能合约地址")
+    var address: String? = null
+
     @ApiModelProperty("智能合约 regid")
     var contractregid: String? = null
 

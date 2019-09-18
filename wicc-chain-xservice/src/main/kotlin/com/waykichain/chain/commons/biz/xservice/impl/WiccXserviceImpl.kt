@@ -5,6 +5,8 @@ import com.qiniu.util.Json
 import com.waykichain.bet.commons.biz.exception.BizException
 import com.waykichain.biz.redis.repository.impl.ValueCacheRedisRepository
 import com.waykichain.chain.biz.domain.*
+import com.waykichain.chain.biz.domain.QBcWiccTransaction.bcWiccTransaction
+import com.waykichain.chain.commons.biz.constant.TaskConstant
 import com.waykichain.chain.commons.biz.dict.*
 import com.waykichain.chain.commons.biz.env.coin.Environment
 import com.waykichain.chain.commons.biz.repository.mysql.BcWiccAlertLogRepository
@@ -14,28 +16,36 @@ import com.waykichain.chain.commons.biz.service.*
 import com.waykichain.chain.commons.biz.utils.WiccUtils
 import com.waykichain.chain.commons.biz.xservice.CoinHandler
 import com.waykichain.chain.commons.biz.xservice.DingTalkService
+import com.waykichain.chain.commons.biz.xservice.TransactionXService
 import com.waykichain.chain.commons.biz.xservice.WiccMethodClient
+import com.waykichain.chain.dict.SysCoinType
 import com.waykichain.chain.dict.TransactionType
 import com.waykichain.chain.po.*
 import com.waykichain.chain.vo.*
+import com.waykichain.coin.wicc.vo.tx.BaseTx
+import com.waykichain.chain.vo.v2.AccountTokenInfo
+import com.waykichain.chain.vo.v2.CandidateUid
+import com.waykichain.chain.vo.v2.VoteFund
 import com.waykichain.coin.wicc.po.CreateContractPO
 import com.waykichain.coin.wicc.po.CreateContractTxPO
-import com.waykichain.coin.wicc.po.SendToAddressPO
 import com.waykichain.coin.wicc.po.SendToAddressWithFeePO
-import com.waykichain.coin.wicc.vo.WiccGetTxDetailResult
-import com.waykichain.coin.wicc.vo.WiccInfoJsonRpcResponse
-import org.bouncycastle.crypto.tls.CipherType.block
+import com.waykichain.coin.wicc.po.SendTxPO
+import com.waykichain.coin.wicc.vo.*
+import com.waykichain.coin.wicc.vo.tx.BlockRewardTx
+import com.waykichain.coin.wicc.vo.tx.UCoinBlockRewardTx
+import com.waykichain.commons.base.BizResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.BeanUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.DefaultTransactionDefinition
+import java.io.PrintWriter
 import java.math.BigDecimal
 import java.util.*
 import java.util.concurrent.TimeUnit
-import org.springframework.transaction.support.DefaultTransactionDefinition
-import org.springframework.transaction.PlatformTransactionManager
-
+import java.io.StringWriter
 
 
 
@@ -56,19 +66,83 @@ open class WiccXserviceImpl : CoinHandler() {
 
     }
 
+    /** Detail exception*/
+    override fun getAccountInfoWithError(address: String): BizResponse<AccountInfoVO> {
+
+        var bizResponse = BizResponse<AccountInfoVO>()
+        var accountInfoResponse: WiccAccountInfoJsonRpcResponse?
+        try {
+            accountInfoResponse = wiccMethodClient.getClient().getAccountInfo(address)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getAccountInfo()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
+        if(accountInfoResponse.result != null) {
+            var accountInfoVO = AccountInfoVO()
+            accountInfoVO.address = accountInfoResponse.result.address
+            accountInfoVO.keyID = accountInfoResponse.result.keyid
+            accountInfoVO.minerPKey = accountInfoResponse.result.miner_pubkey
+            accountInfoVO.regID = accountInfoResponse.result.regid
+            accountInfoVO.postion = accountInfoResponse.result.position
+//            accountInfoVO.updateHeight = accountInfoResponse.result.updateHeight
+            accountInfoVO.votes = accountInfoResponse.result.received_votes
+            accountInfoVO.publicKey = accountInfoResponse.result.owner_pubkey
+            bizResponse.data = accountInfoVO
+            accountInfoResponse.result.tokens?.forEach{
+                when (it.key) {
+                    CoinType.WICC.symbol -> accountInfoVO.balance = it.value.free_amount.toBigDecimal()
+                }
+                var accountToken = AccountTokenInfo()
+                accountToken.freeAmount = it.value.free_amount
+                accountToken.stakedAmount = it.value.staked_amount
+                accountToken.frozenAmount = it.value.frozen_amount
+                accountInfoVO.tokens[it.key] = accountToken
+            }
+            accountInfoResponse.result.vote_list?.forEach{
+                var voteFund = VoteFund()
+                voteFund.voteType = it.vote_type
+                voteFund.votedBcoins = it.voted_bcoins
+                voteFund.candidateUid = CandidateUid()
+                voteFund.candidateUid!!.id = it.candidate_uid.id
+                voteFund.candidateUid!!.idType = it.candidate_uid.id_type
+                accountInfoVO.votelist.add(voteFund)
+            }
+        } else {
+            if (accountInfoResponse.error != null) {
+                bizResponse.msg = accountInfoResponse.error.message
+                bizResponse.code = accountInfoResponse.error.code
+            } else {
+                bizResponse.code = ErrorCode.RPC_RESPONSE_IS_NULL.code
+                bizResponse.msg =  ErrorCode.RPC_RESPONSE_IS_NULL.msg
+            }
+        }
+
+        return bizResponse
+
+    }
+
     override fun getAccountInfo(address: String): AccountInfoVO? {
         var accountInfoResponse = wiccMethodClient.getClient().getAccountInfo(address)
         var accountInfoVO = AccountInfoVO()
         if(accountInfoResponse.result != null) {
-            accountInfoVO.address = accountInfoResponse.result.Address
-            accountInfoVO.balance = accountInfoResponse.result.balance
-            accountInfoVO.keyID = accountInfoResponse.result.keyID
-            accountInfoVO.minerPKey = accountInfoResponse.result.minerPKey
-            accountInfoVO.regID = accountInfoResponse.result.regID
+            accountInfoVO.address = accountInfoResponse.result.address
+            accountInfoResponse.result.tokens?.forEach{
+                when (it.key) {
+                    CoinType.WICC.symbol -> accountInfoVO.balance = it.value.free_amount.toBigDecimal()
+                }
+                var accountToken = AccountTokenInfo()
+                accountToken.freeAmount = it.value.free_amount
+                accountToken.stakedAmount = it.value.staked_amount
+                accountToken.frozenAmount = it.value.frozen_amount
+                accountInfoVO.tokens[it.key] = accountToken
+            }
+            accountInfoVO.keyID = accountInfoResponse.result.keyid
+            accountInfoVO.minerPKey = accountInfoResponse.result.miner_pubkey
+            accountInfoVO.regID = accountInfoResponse.result.regid
             accountInfoVO.postion = accountInfoResponse.result.position
-            accountInfoVO.updateHeight = accountInfoResponse.result.updateHeight
-            accountInfoVO.votes = accountInfoResponse.result.votes
-            accountInfoVO.publicKey = accountInfoResponse.result.publicKey
+//            accountInfoVO.updateHeight = accountInfoResponse.result.updateHeight
+            accountInfoVO.votes = accountInfoResponse.result.received_votes
+            accountInfoVO.publicKey = accountInfoResponse.result.owner_pubkey
         } else {
 
         }
@@ -99,24 +173,58 @@ open class WiccXserviceImpl : CoinHandler() {
         bcWiccSendTransactionLog.status = 100
         bcWiccSendTransactionLog = bcWiccSendTransactionLogService.save(bcWiccSendTransactionLog)
 
-        var reponse= wiccMethodClient.getClient().WiccCreateContractTx(createContractTxPO)
+        var reponse: WiccCreateContractTxJsonRpcResponse?
+        try {
+            reponse = wiccMethodClient.getClient().WiccCreateContractTx(createContractTxPO)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] WiccCreateContractTx()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         if(reponse.error != null) {
             bcWiccSendTransactionLog.remark = "[${reponse.error.code}],${reponse.error.message} "
             bcWiccSendTransactionLogService.save(bcWiccSendTransactionLog)
-            throw BizException(ErrorCode.SYS_INTERNAL_ERROR.code, bcWiccSendTransactionLog.remark)
+            throw BizException(reponse.error.code, reponse.error.message)
 
         }
-        bcWiccSendTransactionLog.txid = reponse.result.hash
+        bcWiccSendTransactionLog.txid = reponse.result.txid
         bcWiccSendTransactionLogService.save(bcWiccSendTransactionLog)
         return bcWiccSendTransactionLog.txid
     }
 
-    override fun getBalance(address: String?): BalanceVO? {
-        val accountInfo = wiccMethodClient.getClient().getAccountInfo(address)
-        var balanceVO = BalanceVO()
-        balanceVO.balance = accountInfo.result.balance
-        balanceVO.number = accountInfo.result.updateHeight
-        return balanceVO
+    override fun getBalance(address: String?): BizResponse<BalanceVO> {
+        var response: WiccAccountInfoJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().getAccountInfo(address)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getAccountInfo()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
+        var bizResponse = BizResponse<BalanceVO>()
+        if (response.result != null) {
+            var balanceVO = BalanceVO()
+            response.result.tokens?.forEach{
+                when (it.key) {
+                    CoinType.WICC.symbol -> balanceVO.balance = it.value.free_amount.toBigDecimal()
+                    CoinType.WUSD.symbol -> balanceVO.balancewusd = it.value.free_amount.toBigDecimal()
+                }
+                var accountToken = AccountTokenInfo()
+                accountToken.freeAmount = it.value.free_amount
+                accountToken.stakedAmount = it.value.staked_amount
+                accountToken.frozenAmount = it.value.frozen_amount
+                balanceVO.tokens[it.key] = accountToken
+            }
+//            balanceVO.number = response.result.updateHeight
+            bizResponse.data = balanceVO
+        } else {
+            if (response.error != null) {
+                bizResponse.msg = response.error.message
+                bizResponse.code = response.error.code
+            } else {
+                bizResponse.code = ErrorCode.RPC_RESPONSE_IS_NULL.code
+                bizResponse.msg =  ErrorCode.RPC_RESPONSE_IS_NULL.msg
+            }
+        }
+        return bizResponse
     }
 
     override fun getBalanceByLog(address: String?): BalanceVO? {
@@ -144,62 +252,75 @@ open class WiccXserviceImpl : CoinHandler() {
         return txidVO
     }
 
-    override fun getChainTxidInfo(txid: String): TxidDetailVO {
-        var response= wiccMethodClient.getClient().getTxDetail(txid)
-        var txidDetailVO = TxidDetailVO()
-        txidDetailVO.sendAddress = response.result.addr
-        txidDetailVO.fee = response.result.fees.toBigDecimal()
-        if(response.result.money == null) {
-            txidDetailVO.amount = BigDecimal.ZERO
-        } else {
-            txidDetailVO.amount = BigDecimal(response.result.money)
+    override fun getChainTxidInfo(txid: String): BizResponse<TxidDetailVO> {
+
+        var baseTx: BaseTx?
+        try {
+            baseTx = transactionXService.getTxDetail(txid)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getTxDetail()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
         }
-        txidDetailVO.toAddress = response.result.desaddr
-        txidDetailVO.regId = response.result.regid
-        txidDetailVO.txid = response.result.hash
-        txidDetailVO.contract = response.result.arguments
-        if(txidDetailVO.contract == null)
-            txidDetailVO.contract =response.result.arguments
+        var bizResponse = BizResponse<TxidDetailVO>()
+        if (baseTx != null) {
+            var txidDetailVO = TxidDetailVO()
+            txidDetailVO.sendAddress = baseTx.from_addr
+            txidDetailVO.fee = baseTx.fees.toBigDecimal()
+            txidDetailVO.amount = BigDecimal(baseTx.coin_amount ?: 0)
+            txidDetailVO.coinSymbol = baseTx.coin_symbol
+            txidDetailVO.feeSymbol = baseTx.fee_symbol
+            txidDetailVO.toAddress = baseTx.to_addr
+            txidDetailVO.regId = baseTx.tx_uid
+            txidDetailVO.txid = baseTx.txid
+            txidDetailVO.contract = baseTx.arguments
+            txidDetailVO.txType = baseTx.tx_type
+            txidDetailVO.arguments =baseTx.arguments
 
-        txidDetailVO.arguments = response.result.arguments
-        txidDetailVO.memo = response.result.memo
+            bizResponse.data = txidDetailVO
+        } else {
+            bizResponse.code = ErrorCode.RPC_RESPONSE_IS_NULL.code
+            bizResponse.msg =  ErrorCode.RPC_RESPONSE_IS_NULL.msg
+        }
 
-        txidDetailVO.txType = response.result.txtype
-        txidDetailVO.arguments =response.result.arguments
-        txidDetailVO.memo = response.result.memo
-        return txidDetailVO
+        return bizResponse
 
     }
 
     /**
      * 根据交易hash查询交易详细信息
      */
-    override fun getChainTxidDetailInfo(txid: String): TxidDetailInfoVO {
-        val response= wiccMethodClient.getClient().getTxDetail(txid)
-        val txDetailInfoVO = TxidDetailInfoVO()
-        txDetailInfoVO.addr = response.result.addr
-        txDetailInfoVO.txtype = response.result.txtype
-        if(response.result.money == null) {
-            txDetailInfoVO.money = BigDecimal.ZERO
-        } else {
-            txDetailInfoVO.money = BigDecimal(response.result.money)
+    override fun getChainTxidDetailInfo(txid: String): BizResponse<TxidDetailInfoVO> {
+
+        var response: BaseTx?
+        try {
+            response = transactionXService.getTxDetail(txid)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getTxDetail()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
         }
-        if (null == response.result.fees) {
-            txDetailInfoVO.fees = BigDecimal.ZERO
+        var bizResponse = BizResponse<TxidDetailInfoVO>()
+        if (response != null) {
+            val txDetailInfoVO = TxidDetailInfoVO()
+            txDetailInfoVO.addr = response.from_addr
+            txDetailInfoVO.txtype = response.tx_type
+            txDetailInfoVO.money = response.coin_amount.toBigDecimal()
+            txDetailInfoVO.fees = response.fees.toBigDecimal()
+            txDetailInfoVO.desaddr = response.to_addr
+            txDetailInfoVO.regid = response.tx_uid
+            txDetailInfoVO.hash = response.txid
+            txDetailInfoVO.height = response.valid_height
+            txDetailInfoVO.blockhash = response.block_hash
+            txDetailInfoVO.confirmHeight = response.confirmed_height
+            txDetailInfoVO.confirmedtime = response.confirmed_time
+            txDetailInfoVO.contract = response.arguments
+            txDetailInfoVO.rawtx = response.rawtx
+            bizResponse.data = txDetailInfoVO
         } else {
-            txDetailInfoVO.fees = response.result.fees.toBigDecimal()
+            bizResponse.code = ErrorCode.RPC_RESPONSE_IS_NULL.code
+            bizResponse.msg =  ErrorCode.RPC_RESPONSE_IS_NULL.msg
         }
 
-        txDetailInfoVO.desaddr = response.result.desaddr
-        txDetailInfoVO.regid = response.result.regid
-        txDetailInfoVO.hash = response.result.hash
-        txDetailInfoVO.height = response.result.height
-        txDetailInfoVO.blockhash = response.result.blockhash
-        txDetailInfoVO.confirmHeight = response.result.confirmedheight
-        txDetailInfoVO.confirmedtime = response.result.confirmedtime
-        txDetailInfoVO.contract = response.result.arguments
-        txDetailInfoVO.rawtx = response.result.rawtx
-        return txDetailInfoVO
+        return bizResponse
     }
 
 
@@ -216,20 +337,22 @@ open class WiccXserviceImpl : CoinHandler() {
         bcWiccSendTransactionLog = bcWiccSendTransactionLogService.save(bcWiccSendTransactionLog)
 
 
-//        var sendToAddressPO = SendToAddressPO()
-//        sendToAddressPO.sendAddress = bcWiccSendTransactionLog.sendAddress
-//        sendToAddressPO.recvAddress = bcWiccSendTransactionLog.recvAddress
-//        sendToAddressPO.amount = coinSendTransactionPO.amount
-        var sendToAddressWithFeePO = SendToAddressWithFeePO()
-        sendToAddressWithFeePO.sender = bcWiccSendTransactionLog.sendAddress
-        sendToAddressWithFeePO.recviver = bcWiccSendTransactionLog.recvAddress
+        var sendToAddressWithFeePO = SendTxPO()
+        sendToAddressWithFeePO.sendAddress = bcWiccSendTransactionLog.sendAddress
+        sendToAddressWithFeePO.receiveAddress = bcWiccSendTransactionLog.recvAddress
         sendToAddressWithFeePO.amount = coinSendTransactionPO.amount
         sendToAddressWithFeePO.fee =  coinSendTransactionPO.fee?: BigDecimal(TransactionConstantDict.SENDTOADDRESS_DEFAULT_FEE.value)
-        var reponse= wiccMethodClient.getClient().sendToAddressWithFee(sendToAddressWithFeePO)
+        var reponse: WiccSendToAddressWithFeeJsonRpcResponse?
+        try {
+            reponse = wiccMethodClient.getClient().sendToAddressWithFee(sendToAddressWithFeePO)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] sendToAddressWithFee()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         if(reponse.error != null) {
             bcWiccSendTransactionLog.remark = "[${reponse.error.code}],${reponse.error.message} "
             bcWiccSendTransactionLogService.save(bcWiccSendTransactionLog)
-            throw BizException(com.waykichain.chain.commons.biz.dict.ErrorCode.SYS_INTERNAL_ERROR.code, bcWiccSendTransactionLog.remark)
+            throw BizException(reponse.error.code, reponse.error.message)
 
         }
         bcWiccSendTransactionLog.txid = reponse.result.hash
@@ -239,10 +362,15 @@ open class WiccXserviceImpl : CoinHandler() {
 
     override fun genAddress(addressType:Int?): CoinAddressVO {
         var coinAddressVO = CoinAddressVO()
-        var reponse = wiccMethodClient.getClient().newAddress
+        var reponse: WiccAddressJsonRpcResponse?
+        try {
+            reponse = wiccMethodClient.getClient().newAddress
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] newAddress", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         if(reponse.error != null) {
-            throw BizException(com.waykichain.chain.commons.biz.dict.ErrorCode.SYS_INTERNAL_ERROR.code,
-                    reponse.error.code.toString() + reponse.error.message)
+            throw BizException(reponse.error.code, reponse.error.message)
         }
 
         coinAddressVO.address = reponse.result.addr
@@ -280,6 +408,8 @@ open class WiccXserviceImpl : CoinHandler() {
                 transaction.desAddress = bean.desaddr
                 transaction.symbol = CoinType.WICC.msg
                 transaction.tx = bean.txid
+                transaction.coinsymbol = bean.coinSymbol
+                transaction.feesymbol = bean.feeSymbol
                 transaction.confirmedTime = Date(bean.confirmedTime)
                 if (null != bean.fees) {
                     transaction.fees = BigDecimal(bean.fees)
@@ -306,7 +436,7 @@ open class WiccXserviceImpl : CoinHandler() {
         var lastBlockId= bcWiccBlockService.getLastBlockId()
 
         /**获取最新链上最新block*/
-        var currentBcNumber = wiccMethodClient.getClient().info.result.tipblockheight
+        var currentBcNumber = wiccMethodClient.getClient().info.result.tipblock_height
 
         val coin = coinService.getBySymbol(com.waykichain.chain.commons.biz.dict.CoinType.WICC.symbol)
 
@@ -321,6 +451,7 @@ open class WiccXserviceImpl : CoinHandler() {
         var dbTailNumber =  currentBcNumber - coin.miniConfirmCount
 
         ((lastBlockId!!.plus(1))!!..dbTailNumber).forEach {
+            logger.info( "add new block, blockHeight=$it")
             addNewBlock(it)
         }
     }
@@ -331,83 +462,116 @@ open class WiccXserviceImpl : CoinHandler() {
         var bcWiccBlock = BcWiccBlock()
         response.result.let {
             bcWiccBlock.number = it.height
-            bcWiccBlock.hash = it.hash
+            bcWiccBlock.hash = it.block_hash
             bcWiccBlock.confirmations = it.confirmations
             bcWiccBlock.size = it.size
             bcWiccBlock.height = it.height
             bcWiccBlock.version = it.version
-            bcWiccBlock.merkleRoot = it.merkleroot
+            bcWiccBlock.merkleRoot = it.merkle_root
             bcWiccBlock.time = Date(it.time * 1000)
             bcWiccBlock.chainwork = it.chainwork
             bcWiccBlock.nonce = it.nonce
             bcWiccBlock.fuel = it.fuel
             bcWiccBlock.fuelRate = it.fuelrate
-            bcWiccBlock.previousBlockHash = it.previousblockhash
-            bcWiccBlock.nextBlockHash = it.nextblockhash
+            bcWiccBlock.previousBlockHash = it.previous_block_hash
+            bcWiccBlock.nextBlockHash = it.next_block_hash
         }
 
-        var txdetails = ArrayList<WiccGetTxDetailResult>()
-
-        response.result.tx.forEach {
-            val txdetail = wiccMethodClient.getClient().getTxDetail(it).result
-            txdetails.add(txdetail)
-            logger.info("txdetail:" + Json.encode(txdetail))
-            ///<TODO 修改余额变化表
-            if(txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.COMMON_TX.type ||
-                    txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.CONTRACT_TX.type ||
-                    txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.REG_ACCT_TX.type ||
-                    txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.REG_APP_TX.type) {
-                    var money = txdetail.money
-                    if(money == null) {
-                        money = 0L
-                    }
-                    ///< 减小起转账人的余额
-                    bcWiccWalletAccountService.addBalance(
-                            txdetail.addr,
-                            com.waykichain.chain.commons.biz.dict.CoinType.WICC.symbol,
-                            0L.minus(money),
-                            0L.minus(txdetail.fees),
-                            txdetail.txtype,
-                            txdetail.hash,
-                            txdetail.confirmedheight,
-                            Date(txdetail.confirmedtime * 1000),
-                            null)
-                }
-
-            if(txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.COMMON_TX.type ||
-                    txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.CONTRACT_TX.type) {
-                    bcWiccWalletAccountService.addBalance(
-                            txdetail.desaddr,
-                            com.waykichain.chain.commons.biz.dict.CoinType.WICC.symbol,
-                            txdetail.money,
-                            0,
-                            txdetail.txtype,
-                            txdetail.hash,
-                            txdetail.confirmedheight,
-                            WiccUtils.getGmt0(txdetail.confirmedtime),
-                            null)
-            }
-            if(txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.REWARD_TX.type ){
-                    //<旷工奖励
-                    bcWiccWalletAccountService.addBalance(
-                            txdetail.addr,
-                            com.waykichain.chain.commons.biz.dict.CoinType.WICC.symbol,
-                            txdetail.money,
-                            0,
-                            txdetail.txtype,
-                            txdetail.hash,
-                            txdetail.confirmedheight,
-                            WiccUtils.getGmt0(txdetail.confirmedtime),
-                            null)
-                }
-
-            if(txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.CONTRACT_TX.type) {
-                    ///< 解析合约
-            }
-        }
+        var txdetails = updateBlockTx(response.result.tx)
 
         updateBlockInfo(bcWiccBlock, txdetails)
     }
+
+    private fun updateBlockTx(txs: List<String>): ArrayList<BaseTx> {
+        var txdetails = ArrayList<BaseTx>()
+
+        for (txid in txs) {
+            val txdetail = transactionXService.getTxDetail(txid)?: continue
+
+            logger.info("txdetail:" + Json.encode(txdetail))
+
+            updateAccount(txdetail)
+
+            txdetails.add(txdetail)
+        }
+        return txdetails
+    }
+
+    private  fun updateAccount(txdetail: BaseTx) {
+
+        if (txdetail.tx_type == TransactionType.BCOIN_TRANSFER_TX.type || txdetail.tx_type == TransactionType.BCOIN_TRANSFER_TX.type
+                || txdetail.tx_type == TransactionType.UCOIN_TRANSFER_TX.type || txdetail.tx_type == TransactionType.LCONTRACT_DEPLOY_TX.type ||
+                txdetail.tx_type == TransactionType.LCONTRACT_INVOKE_TX.type ) {
+
+            var money = txdetail.coin_amount
+            if (txdetail.coin_symbol == SysCoinType.WICC.code && money == 0L) money = txdetail.coin_amount
+            ///< 减小起转账人的余额
+            bcWiccWalletAccountService.addBalance(
+                    txdetail.from_addr,
+                    SysCoinType.WICC.code,
+                    0L.minus(money),
+                    0L.minus(txdetail.fees),
+                    txdetail.tx_type,
+                    txdetail.txid,
+                    txdetail.confirmed_height,
+                    WiccUtils.getGmt0(txdetail.confirmed_time),
+                    null)
+        }
+
+        if (txdetail.tx_type == TransactionType.BCOIN_TRANSFER_TX.type ||  txdetail.tx_type == TransactionType.UCOIN_TRANSFER_TX.type ) {
+            bcWiccWalletAccountService.addBalance(
+                    txdetail.to_addr!!,
+                    SysCoinType.WICC.code,
+                    txdetail.coin_amount,
+                    0,
+                    txdetail.tx_type,
+                    txdetail.txid,
+                    txdetail.confirmed_height,
+                    WiccUtils.getGmt0(txdetail.confirmed_time),
+                    null)
+        }
+
+        if (txdetail.tx_type == TransactionType.BLOCK_REWARD_TX.type) {
+            val blockRewardTx: BlockRewardTx = txdetail as BlockRewardTx
+            //<旷工奖励
+            if (blockRewardTx.reward_fees.compareTo(0L) != 0) {
+                bcWiccWalletAccountService.addBalance(
+                        txdetail.from_addr,
+                        SysCoinType.WICC.code,
+                        blockRewardTx.reward_fees,
+                        0,
+                        txdetail.tx_type,
+                        txdetail.txid,
+                        txdetail.confirmed_height,
+                        WiccUtils.getGmt0(txdetail.confirmed_time),
+                        null)
+            }
+        }
+
+        if ( txdetail.tx_type == TransactionType.UCOIN_BLOCK_REWARD_TX.type) {
+            val uCoinBlockRewardTx: UCoinBlockRewardTx = txdetail as UCoinBlockRewardTx
+            //<旷工奖励
+            if (uCoinBlockRewardTx.reward_fees != null && uCoinBlockRewardTx.reward_fees!!.WICC.compareTo(0L) != 0) {
+
+                bcWiccWalletAccountService.addBalance(
+                        txdetail.from_addr,
+                        SysCoinType.WICC.code,
+                        uCoinBlockRewardTx.reward_fees!!.WICC?:0L,
+                        0,
+                        txdetail.tx_type,
+                        txdetail.txid,
+                        txdetail.confirmed_height,
+                        WiccUtils.getGmt0(txdetail.confirmed_time),
+                        null)
+            }
+        }
+
+
+//            if (txdetail.tx_type == TransactionType.LCONTRACT_DEPLOY_TX.type) {
+//                ///< 解析合约
+//            }
+    }
+
 
     override fun submitOfflineTransaction(coinOfflineTransactionPO: CoinOfflineTransactionPO): String? {
         var bcWiccOfflineTransacationLog = BcWiccOfflineTransacationLog()
@@ -416,14 +580,20 @@ open class WiccXserviceImpl : CoinHandler() {
         bcWiccOfflineTransacationLog = bcWiccOfflineTransacationLogService.save(bcWiccOfflineTransacationLog)
 
 
-        var reponse= wiccMethodClient.getClient().submitTx(coinOfflineTransactionPO.offlineTransactionInfo!!)
+        var reponse: WiccSubmitTxJsonRpcResponse?
+        try {
+            reponse = wiccMethodClient.getClient().submitTx(coinOfflineTransactionPO.offlineTransactionInfo!!)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] submitTx()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         if(reponse.error != null) {
             bcWiccOfflineTransacationLog.remark = "[${reponse.error.code}],${reponse.error.message} "
             bcWiccOfflineTransacationLogService.save(bcWiccOfflineTransacationLog)
-            throw BizException(com.waykichain.chain.commons.biz.dict.ErrorCode.SYS_INTERNAL_ERROR.code, bcWiccOfflineTransacationLog.remark)
+            throw BizException(reponse.error.code, reponse.error.message)
 
         }
-        bcWiccOfflineTransacationLog.txid = reponse.result.hash
+        bcWiccOfflineTransacationLog.txid = reponse.result.txid
         bcWiccOfflineTransacationLogService.save(bcWiccOfflineTransacationLog)
         return bcWiccOfflineTransacationLog.txid
     }
@@ -433,40 +603,12 @@ open class WiccXserviceImpl : CoinHandler() {
     }
 
     @Transactional
-    open fun updateBlockInfo(bcWiccBlock: BcWiccBlock, txdetails:List<WiccGetTxDetailResult>) {
+    open fun updateBlockInfo(bcWiccBlock: BcWiccBlock, txdetails:List<BaseTx>) {
         ///<Save BcBtcBlock
         ///<Save Transactions
         var bcWiccTransactions = ArrayList<BcWiccTransaction>()
         txdetails.forEach{
-            var  bcWiccTransaction = BcWiccTransaction()
-            bcWiccTransaction.blockNumber = bcWiccBlock.number
-            bcWiccTransaction.blockHash = it.blockhash
-            bcWiccTransaction.txid = it.hash
-            bcWiccTransaction.txType = it.txtype
-            bcWiccTransaction.ver = it.ver
-            bcWiccTransaction.regid = it.regid
-            bcWiccTransaction.addr = it.addr
-            bcWiccTransaction.descregid = it.desregid
-            bcWiccTransaction.desaddr = it.desaddr
-            bcWiccTransaction.money = it.money
-            bcWiccTransaction.fees = it.fees
-            bcWiccTransaction.height = it.height
-            bcWiccTransaction.contract = it.arguments
-            if(bcWiccTransaction.contract == null)
-                bcWiccTransaction.contract = it.arguments
-            bcWiccTransaction.confirmHeight = it.confirmedheight
-            bcWiccTransaction.confirmedTime = it.confirmedtime
-            bcWiccTransaction.rawtx = it.rawtx
-            bcWiccTransaction.pubkey = it.pubkey
-            bcWiccTransaction.minerPubkey = it.minerpubkey
-            bcWiccTransaction.script = it.script
-            if (it.listOutput != null)
-                bcWiccTransaction.listOutput = it.listOutput.toString()
-            if (it.operVoteFundList != null) {
-                bcWiccTransaction.operVoteFundList  = JSON.toJSONString(it.operVoteFundList)
-            }
-
-            bcWiccTransactions.add(bcWiccTransaction)
+            bcWiccTransactions.add(transactionXService.tranferTxDetailForDB(it))
         }
         try {
             bcWiccBlockService.save(bcWiccBlock)
@@ -482,28 +624,45 @@ open class WiccXserviceImpl : CoinHandler() {
      * 激活账户
      */
     override fun registerAccountTx(queryAccountInfoPO: QueryAccountInfoPO): String? {
-        val response = wiccMethodClient.getClient().activeAddress(queryAccountInfoPO.address)
+        var response: WiccSubmitTxJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().activeAddress(queryAccountInfoPO.address)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] activeAddress()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         if(response.error != null) {
-            throw BizException(com.waykichain.chain.commons.biz.dict.ErrorCode.SYS_INTERNAL_ERROR.code,
-                    response.error.code.toString() + response.error.message)
+            throw BizException(response.error.code, response.error.message)
         }
 
-        return response.result.hash
+        return response.result.txid
     }
 
 
     override fun createContract(createContractPO: CreateContractPO): String? {
 
-        val response = wiccMethodClient.getClient().createContract(createContractPO)
+        var response: WiccTxHashJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().createContract(createContractPO)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] createContract()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         if (response.error != null)  {
-            throw BizException(ErrorCode.SYS_INTERNAL_ERROR.code, ErrorCode.SYS_INTERNAL_ERROR.msg)
+            throw BizException(response.error.code, response.error.message)
         }
 
-        return response.result.hash
+        return response.result.txid
     }
 
     override fun getBlockCount(): Long? {
-        val response = wiccMethodClient.getClient().getBlockCount()
+        var response: WiccBlockCountJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().getBlockCount()
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getBlockCount()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         if (response.error != null) {
             throw BizException(response.error.code, response.error.message);
         }
@@ -512,23 +671,23 @@ open class WiccXserviceImpl : CoinHandler() {
     }
 
     override fun getBlockByHeight(height: Int): BcWiccBlock{
-        val response = wiccMethodClient.getClient().getBlock(height)
+        var response = wiccMethodClient.getClient().getBlock(height)
         var bcWiccBlock = BcWiccBlock()
         response.result.let {
             bcWiccBlock.number = it.height
-            bcWiccBlock.hash = it.hash
+            bcWiccBlock.hash = it.block_hash
             bcWiccBlock.confirmations = it.confirmations
             bcWiccBlock.size = it.size
             bcWiccBlock.height = it.height
             bcWiccBlock.version = it.version
-            bcWiccBlock.merkleRoot = it.merkleroot
+            bcWiccBlock.merkleRoot = it.merkle_root
             bcWiccBlock.time = Date(it.time * 1000)
             bcWiccBlock.chainwork = it.chainwork
             bcWiccBlock.nonce = it.nonce
             bcWiccBlock.fuel = it.fuel
             bcWiccBlock.fuelRate = it.fuelrate
-            bcWiccBlock.previousBlockHash = it.previousblockhash
-            bcWiccBlock.nextBlockHash = it.nextblockhash
+            bcWiccBlock.previousBlockHash = it.previous_block_hash
+            bcWiccBlock.nextBlockHash = it.next_block_hash
         }
         return bcWiccBlock
     }
@@ -539,16 +698,31 @@ open class WiccXserviceImpl : CoinHandler() {
             throw BizException(response.error.code, response.error.message)
         }
 
-        return response.result.hash;
+        return response.result.txid
     }
 
-    override fun getTotalCoin(): BigDecimal? {
-        val response = wiccMethodClient.getClient().getTotalCoin()
-        if (response.error != null) {
-            throw BizException(response.error.code, response.error.message)
-        }
+    override fun getTotalCoin(): BizResponse<BigDecimal> {
 
-        return response.result?.totalCoin
+        var response: WiccTotalCoinJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().getTotalCoin()
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getTotalCoin()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
+        var bizResponse = BizResponse<BigDecimal>()
+        if (response.result != null) {
+            bizResponse.data = response.result.total_coins
+        } else {
+            if (response.error != null) {
+                bizResponse.msg = response.error.message
+                bizResponse.code = response.error.code
+            } else {
+                bizResponse.code = ErrorCode.RPC_RESPONSE_IS_NULL.code
+                bizResponse.msg =  ErrorCode.RPC_RESPONSE_IS_NULL.msg
+            }
+        }
+        return bizResponse
     }
 
     /**
@@ -575,7 +749,7 @@ open class WiccXserviceImpl : CoinHandler() {
                     logger.info("[scan chain rollback] get block failed. bolockNumber=${rollBackBlock.height} ")
                     continue
                 }
-                if(rollBackBlock.hash != response.result.hash) {
+                if(rollBackBlock.hash != response.result.block_hash) {
 
                     /** -交易信息*/
                     val transactionList = bcWiccTransactionService.getByBlockNumber(rollBackBlock.height)
@@ -596,31 +770,31 @@ open class WiccXserviceImpl : CoinHandler() {
                     var oldBlock = bcWiccBlockService.getByHeight(rollBackBlock.height)
                     oldBlock?.let {
                         it.number = response.result.height
-                        it.hash = response.result.hash
+                        it.hash = response.result.block_hash
                         it.confirmations = response.result.confirmations
                         it.size = response.result.size
                         it.height = response.result.height
                         it.version = response.result.version
-                        it.merkleRoot = response.result.merkleroot
+                        it.merkleRoot = response.result.merkle_root
                         it.time = Date(response.result.time * 1000)
                         it.chainwork = response.result.chainwork
                         it.nonce = response.result.nonce
                         it.fuel = response.result.fuel
                         it.fuelRate = response.result.fuelrate
-                        it.previousBlockHash = response.result.previousblockhash
-                        it.nextBlockHash = response.result.nextblockhash
+                        it.previousBlockHash = response.result.previous_block_hash
+                        it.nextBlockHash = response.result.next_block_hash
                         bcWiccBlockService.save(it)
                     }
 
                     /** -修改相邻区块信息*/
                     var previousBlock = bcWiccBlockService.getByHeight(rollBackBlock.height - 1)
                     if (previousBlock != null) {
-                        previousBlock.nextBlockHash = response.result.hash
+                        previousBlock.nextBlockHash = response.result.block_hash
                         bcWiccBlockService.save(previousBlock)
                     }
                     var nextBlock = bcWiccBlockService.getByHeight(rollBackBlock.height + 1)
                     if (nextBlock != null) {
-                        nextBlock.previousBlockHash = response.result.hash
+                        nextBlock.previousBlockHash = response.result.block_hash
                         bcWiccBlockService.save(nextBlock)
                     }
 
@@ -669,7 +843,7 @@ open class WiccXserviceImpl : CoinHandler() {
                     logger.info("[scan chain rollback] Record error data, getBlockHash() Error. bolockNumber=${block.height} ")
                     continue
                 }
-                if (block.hash != response.result.hash) {
+                if (block.hash != response.result.txid) {
 
                     var rollbackBlockBak = RollbackBlockBak()
                     BeanUtils.copyProperties(block, rollbackBlockBak)
@@ -726,10 +900,11 @@ open class WiccXserviceImpl : CoinHandler() {
             rollbackTransactionBakService.save(rollbackTransactionBak)
 
             //修改账户信息
-            if(tran.txType == com.waykichain.chain.commons.biz.dict.WiccTransacationType.COMMON_TX.type ||
-                    tran.txType == com.waykichain.chain.commons.biz.dict.WiccTransacationType.CONTRACT_TX.type ||
-                    tran.txType == com.waykichain.chain.commons.biz.dict.WiccTransacationType.REG_ACCT_TX.type ||
-                    tran.txType == com.waykichain.chain.commons.biz.dict.WiccTransacationType.REG_APP_TX.type) {
+            if(tran.txType == TransactionType.BCOIN_TRANSFER_TX.type ||
+                    tran.txType == TransactionType.BCOIN_TRANSFER_TX.type||
+                    tran.txType == TransactionType.LCONTRACT_DEPLOY_TX.type ||
+                    tran.txType == TransactionType.ACCOUNT_REGISTER_TX.type ||
+                    tran.txType == TransactionType.LCONTRACT_INVOKE_TX.type) {
 
                 //增加起转账人的余额
                 bcWiccWalletAccountService.addBalance(
@@ -740,12 +915,11 @@ open class WiccXserviceImpl : CoinHandler() {
                         tran.txType,
                         tran.txid,
                         tran.confirmHeight,
-                        Date(tran.confirmedTime * 1000),
+                        WiccUtils.getGmt0(tran.confirmedTime),
                         "rollback")
             }
 
-            if(tran.txType == com.waykichain.chain.commons.biz.dict.WiccTransacationType.COMMON_TX.type ||
-                    tran.txType == com.waykichain.chain.commons.biz.dict.WiccTransacationType.CONTRACT_TX.type) {
+            if(tran.txType == TransactionType.BCOIN_TRANSFER_TX.type || tran.txType == TransactionType.BCOIN_TRANSFER_TX.type ) {
                 bcWiccWalletAccountService.addBalance(
                         tran.desaddr,
                         com.waykichain.chain.commons.biz.dict.CoinType.WICC.symbol,
@@ -757,7 +931,8 @@ open class WiccXserviceImpl : CoinHandler() {
                         WiccUtils.getGmt0(tran.confirmedTime),
                         "rollback")
             }
-            if(tran.txType == com.waykichain.chain.commons.biz.dict.WiccTransacationType.REWARD_TX.type ){
+
+            if(tran.txType == TransactionType.BLOCK_REWARD_TX.type || tran.txType == TransactionType.UCOIN_BLOCK_REWARD_TX.type ){
                 //<旷工奖励
                 bcWiccWalletAccountService.addBalance(
                         tran.addr,
@@ -771,7 +946,7 @@ open class WiccXserviceImpl : CoinHandler() {
                         "rollback")
             }
 
-            if(tran.txType == com.waykichain.chain.commons.biz.dict.WiccTransacationType.CONTRACT_TX.type) {
+            if(tran.txType == TransactionType.LCONTRACT_DEPLOY_TX.type) {
                 ///< 解析合约
             }
 
@@ -785,93 +960,59 @@ open class WiccXserviceImpl : CoinHandler() {
      */
     private fun syncTransactionAgain(hash: String, bcWiccTransactions: MutableList<BcWiccTransaction>, height: Int) {
 
-        val txdetail = wiccMethodClient.getClient().getTxDetail(hash).result
-
+        val txdetail = transactionXService.getTxDetail(hash)
         logger.info("[scan chain rollback] Synchronize data from chain, transaction=${Json.encode(txdetail)}")
         txdetail?.let {
+            bcWiccTransactions.add(transactionXService.tranferTxDetailForDB(txdetail))
+            updateAccount(txdetail)
+        }
+    }
 
-            var  bcWiccTransaction = BcWiccTransaction()
-            bcWiccTransaction.blockNumber = height
-            bcWiccTransaction.blockHash = it.blockhash
-            bcWiccTransaction.txid = it.hash
-            bcWiccTransaction.txType = it.txtype
-            bcWiccTransaction.ver = it.ver
-            bcWiccTransaction.regid = it.regid
-            bcWiccTransaction.addr = it.addr
-            bcWiccTransaction.descregid = it.desregid
-            bcWiccTransaction.desaddr = it.desaddr
-            bcWiccTransaction.money = it.money
-            bcWiccTransaction.fees = it.fees
-            bcWiccTransaction.height = it.height
-            bcWiccTransaction.contract = it.arguments
-            if(bcWiccTransaction.contract == null)
-                bcWiccTransaction.contract = it.arguments
-            bcWiccTransaction.confirmHeight = it.confirmedheight
-            bcWiccTransaction.confirmedTime = it.confirmedtime
-            bcWiccTransaction.rawtx = it.rawtx
-            bcWiccTransaction.pubkey = it.pubkey
-            bcWiccTransaction.minerPubkey = it.minerpubkey
-            bcWiccTransaction.script = it.script
-            if (it.listOutput != null)
-                bcWiccTransaction.listOutput = it.listOutput.toString()
-            if (it.operVoteFundList != null) {
-                bcWiccTransaction.operVoteFundList  = JSON.toJSONString(it.operVoteFundList)
+
+    /**
+     *  check chain stop sync
+     */
+    override fun checkChainStop(): Boolean {
+
+        /** 错误日志*/
+        var message: String? = null
+        var chainHeightNow: Long? = null
+        try {
+            val response = wiccMethodClient.getClient().getBlockCount()
+            if (response.result == null) {
+                logger.error("[Chain node stop check] getBlockCount error! code=${response.error?.code},messgae=${response.error?.message}")
+                message = "Chain node stop notify : get block error!  code=${response.error?.code},messgae=${response.error?.message}"
+            } else {
+                chainHeightNow = response.result
+                val chainHeightLast  = valueCacheRedisRepository.get(TaskConstant.LAST_CHAIN_HEIGHT_REDIS_KEY, Long::class.java)
+                logger.info("[Chain node stop check] chainHeightLast=$chainHeightLast, chainHeightNow=$chainHeightNow")
+                if (chainHeightLast == chainHeightNow) {
+                    message = "Chain node stop notify : The node may have stopped syncing, block height : $chainHeightNow"
+                } else {
+                    valueCacheRedisRepository.put(TaskConstant.LAST_CHAIN_HEIGHT_REDIS_KEY, chainHeightNow.toString())
+                }
             }
-            bcWiccTransactions.add(bcWiccTransaction)
-
+        } catch (e: Exception) {
+            logger.error("[Chain node stop check] get block error!", e)
+            val sw = StringWriter()
+            var pw = PrintWriter(sw)
+            message = "Chain node stop  notify : This node may be dead,get block height error!  ${sw}"
         }
 
-        if(txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.COMMON_TX.type ||
-                txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.CONTRACT_TX.type ||
-                txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.REG_ACCT_TX.type ||
-                txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.REG_APP_TX.type) {
-            var money = txdetail.money
-            if(money == null) {
-                money = 0L
-            }
-            ///< 减小起转账人的余额
-            bcWiccWalletAccountService.addBalance(
-                    txdetail.addr,
-                    com.waykichain.chain.commons.biz.dict.CoinType.WICC.symbol,
-                    0L.minus(money),
-                    0L.minus(txdetail.fees),
-                    txdetail.txtype,
-                    txdetail.hash,
-                    txdetail.confirmedheight,
-                    Date(txdetail.confirmedtime * 1000),
-                    "rollback,sync again")
+        if (message != null) {
+            /** DingTalk*/
+            var chainMsgNotifySettingList = sysChainMsgNotifySettingRepository.findAll(QSysChainMsgNotifySetting.sysChainMsgNotifySetting.msgId.eq(NotifyMessageIdDict.CHAIN_SYNC_STOP_NOTIFY.code))
+            var sendUrl:String? = if( chainMsgNotifySettingList != null && !chainMsgNotifySettingList.none()) chainMsgNotifySettingList.first().msgUrl else null
+            logger.info(message)
+            if (sendUrl != null) dingTalkService.sendTextMessage(sendUrl!!, message)
+            var bcWiccAlertLog = BcWiccAlertLog()
+            bcWiccAlertLog.address = chainHeightNow?.toString()
+            bcWiccAlertLog.alertInfo = message
+            bcWiccAlertLog.notifyLinkUrl=  sendUrl
+            bcWiccAlertLog.alertType = BcWiccAlertLogType.CHAIN_ROOLBACK.num
+            bcWiccAlertLogRepository.save(bcWiccAlertLog)
         }
-
-        if(txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.COMMON_TX.type ||
-                txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.CONTRACT_TX.type) {
-            bcWiccWalletAccountService.addBalance(
-                    txdetail.desaddr,
-                    com.waykichain.chain.commons.biz.dict.CoinType.WICC.symbol,
-                    txdetail.money,
-                    0,
-                    txdetail.txtype,
-                    txdetail.hash,
-                    txdetail.confirmedheight,
-                    WiccUtils.getGmt0(txdetail.confirmedtime),
-                    "rollback,sync again")
-        }
-        if(txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.REWARD_TX.type ){
-            //<旷工奖励
-            bcWiccWalletAccountService.addBalance(
-                    txdetail.addr,
-                    com.waykichain.chain.commons.biz.dict.CoinType.WICC.symbol,
-                    txdetail.money,
-                    0,
-                    txdetail.txtype,
-                    txdetail.hash,
-                    txdetail.confirmedheight,
-                    WiccUtils.getGmt0(txdetail.confirmedtime),
-                    "rollback,sync again")
-        }
-
-        if(txdetail.txtype == com.waykichain.chain.commons.biz.dict.WiccTransacationType.CONTRACT_TX.type) {
-            ///< 解析合约
-        }
+        return true
     }
 
 
@@ -898,6 +1039,8 @@ open class WiccXserviceImpl : CoinHandler() {
     @Autowired lateinit var bcWiccAlertLogRepository: BcWiccAlertLogRepository
     @Autowired lateinit var rollbackBlockBakService: RollbackBlockBakService
     @Autowired lateinit var rollbackTransactionBakService: RollbackTransactionBakService
+    @Autowired lateinit var transactionXService: TransactionXService
+
 
     @Autowired
     private val txManager: PlatformTransactionManager? = null

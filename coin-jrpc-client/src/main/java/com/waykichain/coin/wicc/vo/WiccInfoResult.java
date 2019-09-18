@@ -16,26 +16,26 @@ import java.math.BigDecimal;
 public class WiccInfoResult {
 
     public Long version;
-    public String fullversion;
-    public Long protocolversion;
-    public Long walletversion;
-    public BigDecimal balance;
-    public Integer timeoffset;
+    public String full_version;
+    public Long protocol_version;
+    public Long wallet_version;
+    public BigDecimal wallet_balance;
+    public Integer time_offset;
     public String proxy;
-    public String nettype;
-    public Integer genblock;
-    public String chainwork;
-    public Long tipblocktime;
-    public BigDecimal paytxfee;
-    public BigDecimal relayfee;
-    public Integer fuelrate;
-    public Integer fuel;
-    public String confdir;
-    public String datadir;
-    public Integer syncblockheight;
-    public Integer tipblockheight;
-    public String tipblockhash;
+    public String net_type;
+    public Integer gen_block;
+    public BigDecimal miner_fee_perkb;
+    public BigDecimal relay_fee_perkb;
+    public String conf_dir;
+    public String data_dir;
+    public Integer tipblock_fuel_rate;
+    public Integer tipblock_fuel;
+    public Integer syncblock_height;
+    public Integer tipblock_height;
+    public String  tipblock_hash;
+    public Long tipblock_time;
     public Integer connections;
+    public Integer block_interval;
     public String errors;
 
 }

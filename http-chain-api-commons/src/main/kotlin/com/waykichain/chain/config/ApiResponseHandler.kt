@@ -6,6 +6,7 @@ import com.waykichain.bet.commons.biz.exception.BizException
 import com.waykichain.chain.biz.domain.SysChainRequestLog
 import com.waykichain.chain.commons.biz.dict.ErrorCode
 import com.waykichain.chain.commons.biz.service.SysChainRequestLogService
+import com.waykichain.chain.commons.biz.utils.ErrorCodeTranferUtil
 import com.waykichain.chain.commons.biz.vo.HttpLogMessage
 import com.waykichain.commons.base.BizResponse
 import org.slf4j.LoggerFactory
@@ -171,12 +172,14 @@ open class ApiResponseHandler : ResponseBodyAdvice<Any> {
     @Throws(RuntimeException::class)
     fun bizException(e: BizException, request: HttpServletRequest): BizResponse<Any> {
 
-        val response = BizResponse<Any>(e.code, e.msg)
+        var response = BizResponse<Any>(e.code, e.msg)
 
         request.setAttribute(ERROR_CODE_TAG, response.code)
         request.setAttribute(EXCEPTION_TAG, getStackTrace(e))
 
+        response = ErrorCodeTranferUtil.getErrorCodeFromOriginal(response)
         logger.error("BizException requestUrl[${request.requestURL}] ${e.code}:${e.msg}")
+
         return response
     }
 

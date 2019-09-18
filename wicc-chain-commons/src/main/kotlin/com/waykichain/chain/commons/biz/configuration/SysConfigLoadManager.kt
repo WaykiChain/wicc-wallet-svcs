@@ -2,6 +2,7 @@ package com.waykichain.chain.commons.biz.configuration
 
 import com.waykichain.bet.commons.biz.exception.BizException
 import com.waykichain.chain.commons.biz.service.SysConfigService
+import org.bouncycastle.asn1.x500.style.RFC4519Style.name
 import org.reflections.Reflections
 import org.reflections.scanners.SubTypesScanner
 import org.reflections.util.FilterBuilder
@@ -37,6 +38,7 @@ class SysConfigLoadManager {
         clz.declaredFields.forEach {
             try {
                 val value = sysConfigService.getByName(it.name)
+                logger.info("config init ==========> name=${it.name} value=$value")
                 val type = it.type.toString()//得到此属性的类型
                 var obj: Any? = null
                 if (type.endsWith("String")) {

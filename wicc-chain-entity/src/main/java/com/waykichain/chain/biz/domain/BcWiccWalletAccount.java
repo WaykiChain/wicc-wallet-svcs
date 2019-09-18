@@ -20,6 +20,9 @@ public class BcWiccWalletAccount implements Serializable {
     @Column("address")
     private String address;
 
+    @Column("assets_tokens")
+    private String assetsTokens;
+
     @Column("balance")
     private Long balance;
 
@@ -52,6 +55,14 @@ public class BcWiccWalletAccount implements Serializable {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getAssetsTokens() {
+        return assetsTokens;
+    }
+
+    public void setAssetsTokens(String assetsTokens) {
+        this.assetsTokens = assetsTokens;
     }
 
     public Long getBalance() {

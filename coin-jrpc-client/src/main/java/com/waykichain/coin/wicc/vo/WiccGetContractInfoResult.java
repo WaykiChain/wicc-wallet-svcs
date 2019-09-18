@@ -10,7 +10,11 @@ import lombok.Data;
 @Data
 public class WiccGetContractInfoResult {
 
+    private String address;
     private String contract_regid;
-    private String contract_memo;
-    private String contract_content;
+    private String memo;
+    private String code;
+    private String abi;
+    private Boolean upgradable;
+    private Integer vm_type;
 }

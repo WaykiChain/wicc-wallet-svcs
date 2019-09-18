@@ -16,7 +16,7 @@ import java.math.BigDecimal
  */
 class ContractAccountInfoVO: Serializable {
 
-    @ApiModelProperty(" 查询的用户地址转成16进制字符串")
+    @ApiModelProperty(" 用户地址")
     var maccuserid: String? = null
 
     @ApiModelProperty("智能合约的自由可操作的币的数量")

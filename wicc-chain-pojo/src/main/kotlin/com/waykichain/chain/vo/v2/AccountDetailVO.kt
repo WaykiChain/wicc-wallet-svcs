@@ -1,7 +1,6 @@
 package com.waykichain.chain.vo.v2
 
 
-import com.waykichain.chain.po.v2.BasePO
 import io.swagger.annotations.ApiModelProperty
 import java.io.Serializable
 import java.math.BigDecimal
@@ -23,24 +22,52 @@ class AccountDetailVO : Serializable {
     @ApiModelProperty("矿工标识 (可忽略)")
     var minerpkey: String? = null
 
-    @ApiModelProperty("地址的余额,单位为sawi")
-    var balance: BigDecimal? = null
+    @ApiModelProperty("地址的wicc余额,单位为sawi")
+    var balance: Long? = null
 
-    @ApiModelProperty("投票数量（涉及Dpos投票的参数）")
-    var votes: Long? = null
-
-    @ApiModelProperty("(可忽略)")
-    var updateheight: Int? = null
+    @ApiModelProperty("投票数量")
+    var receivedvotes: Long? = null
 
     @ApiModelProperty("所在位置; inwallet:没有收到过币，inblock:收到过币")
     var position: String?=null
-//    @ApiModelProperty("投票列表")
-//    var voteFundList: MutableList<VoteFund>?=null
+
+    @ApiModelProperty("投票列表")
+    var votelist = arrayListOf<VoteFund>()
+
+    @ApiModelProperty("余额列表")
+    val tokens = mutableMapOf<String, AccountTokenInfo>()
+
+    @ApiModelProperty("")
+    var regidmature: Boolean? = null
+
+    @ApiModelProperty("")
+    var nickid: String? = null
 }
 
-//class VoteFund: Serializable{
-//    @ApiModelProperty("地址")
-//    var address: String? = null
-//    @ApiModelProperty("票数")
-//    var value: Long? = null
-//}
+class VoteFund {
+    var voteType: String? = null
+    var candidateUid: CandidateUid? = null
+    var votedBcoins: Long? = null
+}
+
+class CandidateUid {
+
+    var idType: String? = null
+    var id: String? = null
+
+}
+
+class AccountTokenInfo {
+
+    @ApiModelProperty("可用金额,单位为sawi")
+    var freeAmount: Long? = null
+
+    @ApiModelProperty("")
+    var stakedAmount: Long? = null
+
+    @ApiModelProperty("冻结金额,单位为sawi")
+    var frozenAmount: Long? = null
+
+}
+
+

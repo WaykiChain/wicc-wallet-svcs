@@ -17,8 +17,8 @@ class RadomController {
     fun onGetBalanceByLog(@RequestBody queryBalancePO : QueryBalancePO): BizResponse<BalanceVO> {
         val handler = CoinHandler.getHandler(queryBalancePO.symbol!!)
         val balance = handler!!.getBalanceByLog(queryBalancePO.address)
-        val accountInfoVO = handler!!.getAccountInfo(queryBalancePO.address!!)
-        balance!!.regId =  accountInfoVO!!.regID
+        val accountInfoVO = handler!!.getAccountInfoWithError(queryBalancePO.address!!)?.data
+        balance!!.regId =  accountInfoVO?.regID
 
         return BizResponse(balance)
     }

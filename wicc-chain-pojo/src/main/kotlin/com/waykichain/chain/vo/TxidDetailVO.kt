@@ -15,6 +15,8 @@ class TxidDetailVO : Serializable {
     var contract:String ?= null
     var memo:String ?= null
     var arguments:String ?= null
+    var coinSymbol:String ?= null
+    var feeSymbol:String ?= null
 
 
 }

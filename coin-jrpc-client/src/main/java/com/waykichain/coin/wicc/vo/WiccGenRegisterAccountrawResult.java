@@ -10,5 +10,5 @@ import lombok.Data;
 @Data
 public class WiccGenRegisterAccountrawResult {
 
-    private String rawtx;
+    private String txid;
 }

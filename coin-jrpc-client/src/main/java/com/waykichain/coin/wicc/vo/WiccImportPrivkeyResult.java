@@ -10,5 +10,5 @@ import lombok.Data;
 @Data
 public class WiccImportPrivkeyResult {
 
-    private String imported_key_address;
+        private String imported_key_address;
 }

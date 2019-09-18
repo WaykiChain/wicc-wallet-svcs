@@ -1,5 +1,6 @@
 package com.waykichain.chain.commons.biz.xservice.impl
 
+import com.waykichain.bet.commons.biz.exception.BizException
 import com.waykichain.chain.biz.domain.BcWiccSendTransactionLog
 import com.waykichain.chain.commons.biz.dict.ContractDataType
 import com.waykichain.chain.commons.biz.dict.ErrorCode
@@ -12,8 +13,8 @@ import com.waykichain.chain.contract.util.ContractUtil
 import com.waykichain.chain.po.v2.*
 import com.waykichain.chain.vo.v2.*
 import com.waykichain.coin.wicc.po.*
+import com.waykichain.coin.wicc.vo.*
 import com.waykichain.commons.base.BizResponse
-import groovy.xml.Entity.not
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -45,11 +46,17 @@ class ContractXServiceImpl: ContractXService {
         createContractPO.contract = po.arguments
         createContractPO.fee = po.fee
         createContractPO.amount = po.amount
-        val response = wiccMethodClient.getClient().createContract(createContractPO)
+        var response: WiccTxHashJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().createContract(createContractPO)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] createContract()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         var bizResponse = BizResponse<CallContracttxVO>()
         if (response.result != null) {
             var callContracttxVO = CallContracttxVO()
-            callContracttxVO.hash = response.result.hash
+            callContracttxVO.hash = response.result.txid
             bizResponse.data = callContracttxVO
         } else {
             if (response.error != null)  {
@@ -93,14 +100,20 @@ class ContractXServiceImpl: ContractXService {
         bcWiccSendTransactionLog.status = 100
         bcWiccSendTransactionLog = bcWiccSendTransactionLogService.save(bcWiccSendTransactionLog)
 
-        var response= wiccMethodClient.getClient().WiccCreateContractTx(createContractTxPO)
+        var response: WiccCreateContractTxJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().WiccCreateContractTx(createContractTxPO)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] WiccCreateContractTx()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
 
         var bizResponse = BizResponse<CallContracttxVO>()
         if (response.result != null) {
             var callContracttxVO = CallContracttxVO()
-            callContracttxVO.hash = response.result.hash
+            callContracttxVO.hash = response.result.txid
             bizResponse.data = callContracttxVO
-            bcWiccSendTransactionLog.txid = response.result.hash
+            bcWiccSendTransactionLog.txid = response.result.txid
         } else {
             if (response.error != null)  {
                 bcWiccSendTransactionLog.remark = "[${response.error.code}],${response.error.message} "
@@ -136,7 +149,13 @@ class ContractXServiceImpl: ContractXService {
         var getContractDataPO = GetContractDataPO()
         getContractDataPO.contractRegid = po.regid
         getContractDataPO.key = ContractUtil.toHexString(po.key)
-        var response = wiccMethodClient.getClient().getContractDataRaw(getContractDataPO)
+        var response: WiccGetScriptDataJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().getScriptData(getContractDataPO)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getContractDataRaw()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         if (response.result != null) {
 
             var contractDataVO = ContractDataDetailVO()
@@ -170,12 +189,19 @@ class ContractXServiceImpl: ContractXService {
     override fun getContractRegid(txHash:String):BizResponse<ContractRegidVO>  {
         var getContractRegidPO = GetContractRegidPO()
         getContractRegidPO.hash = txHash
-        val response = wiccMethodClient.getClient().getContractRegid(getContractRegidPO)
+        var response: WiccGetContractRegidJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().getContractRegid(getContractRegidPO)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getContractRegid()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         var bizResponse = BizResponse<ContractRegidVO>()
         if (response.result != null) {
 
             var contractRegidVO = ContractRegidVO()
             contractRegidVO.regid = response.result.regid
+            contractRegidVO.regidhex = response.result.regid_hex
             bizResponse.data = contractRegidVO
         } else {
             if (response.error != null)  {
@@ -201,7 +227,13 @@ class ContractXServiceImpl: ContractXService {
         var po = GetContractDataPO()
         po.contractRegid = regId
         po.key = ContractUtil.toHexString("key_tokenrate");
-        var response = wiccMethodClient.getClient().getScriptData(po)
+        var response: WiccGetScriptDataJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().getScriptData(po)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getScriptData()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
 
         var bizResponse = BizResponse<BigDecimal>()
         if (response.result != null) {
@@ -229,13 +261,20 @@ class ContractXServiceImpl: ContractXService {
 
         var contractInfoPO = GetContractInfoPO()
         contractInfoPO.regid = po.regid
-        val response = wiccMethodClient.getClient().getContractInfo(contractInfoPO)
+        var response: WiccGetContractInfoJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().getContractInfo(contractInfoPO)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getContractInfo()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         var bizResponse = BizResponse<ContractInfoVO>()
         if (response.result != null) {
             var vo = ContractInfoVO()
+            vo.address = response.result.address
             vo.contractregid = response.result.contract_regid
-            vo.contractmemo = response.result.contract_memo
-            vo.contractcontent = ContractUtil.ConvertContractData(response.result.contract_content)
+            vo.contractmemo = response.result.memo
+            vo.contractcontent = ContractUtil.ConvertContractData(response.result.code)
             bizResponse.data = vo
         } else {
             if (response.error != null)  {
@@ -262,11 +301,17 @@ class ContractXServiceImpl: ContractXService {
         var getAppAccInfoPO = GetAppAccInfoPO()
         getAppAccInfoPO.address = po.address
         getAppAccInfoPO.scriptid = po.contractregid
-        val response = wiccMethodClient.getClient().getappaccinfo(getAppAccInfoPO)
+        var response: WiccGetAppAccInfoJsonRpcResponse?
+        try {
+            response = wiccMethodClient.getClient().getappaccinfo(getAppAccInfoPO)
+        } catch (e: Exception) {
+            logger.error("[JsonRpc request error] getappaccinfo()", e)
+            throw BizException(ErrorCode.RPC_REQUEST_ERROR)
+        }
         var bizResponse = BizResponse<ContractAccountInfoVO>()
         if (response.result != null) {
             var accountInfoVO = ContractAccountInfoVO()
-            accountInfoVO.maccuserid = response.result.mAccUserID
+            accountInfoVO.maccuserid = ContractUtil.hexToString(response.result.mAccUserID)
             accountInfoVO.freevalues = response.result.freeValues
             var freezedFunds = response.result.vFreezedFund
             if (freezedFunds != null && freezedFunds.size > 0) {

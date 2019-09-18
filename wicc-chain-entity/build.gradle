@@ -17,7 +17,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "gradle.plugin.com.waykichain.utils.codegen:querydsl-plugin:1.2.27"
-        classpath 'mysql:mysql-connector-java:5.1.40'
+        classpath 'mysql:mysql-connector-java:6.0.6'
     }
 }
 
@@ -32,9 +32,9 @@ dependencies {
 
 querydsl {
     driverClass = 'com.mysql.jdbc.Driver'
-    userName = 'wicc-rw'
-    password = 'wicc@123456'
-    jdbcUrl = 'jdbc:mysql://myql-dev.wic.me:3306/wicc-chain-testnet?autoReconnect=true&useUnicode=yes&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false'
+    userName = 'wayki-rw'
+    password = 'wayiC@r19w'
+    jdbcUrl = 'jdbc:mysql://10.0.0.32:3306/wicc-chain-testnet?autoReconnect=true&useUnicode=yes&characterEncoding=UTF-8&allowMultiQueries=true&useSSL=false'
 
     domainSrcPath = "$project.projectDir/src/main/java/"
     domainPackageName = 'com.waykichain.chain.biz.domain'

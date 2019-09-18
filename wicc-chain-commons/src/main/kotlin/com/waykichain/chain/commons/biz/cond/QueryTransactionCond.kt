@@ -8,4 +8,5 @@ class QueryTransactionCond {
     var pageSize:Int =20
     var currentPage:Int =1
     var txtype:String? = null
+    var coinsymbol:String? = null
 }

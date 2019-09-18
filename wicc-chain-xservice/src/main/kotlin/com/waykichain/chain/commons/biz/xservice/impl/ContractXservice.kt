@@ -48,20 +48,20 @@ open class ContractXservice  {
     }
 
     fun testSendMoney(address:String): WiccSubmitTxJsonRpcResponse? {
-        var  sendToAddressPO = SendToAddressPO()
+        var  sendToAddressPO = SendTxPO()
         sendToAddressPO.amount = BigDecimal(100000000000)
         sendToAddressPO.sendAddress = "wNd7RL89zKpJ7BRxcLXZjyEdaFHcvkXaXn"
-        sendToAddressPO.recvAddress = address
+        sendToAddressPO.receiveAddress = address
 
         var response = wiccMethodClient.getClient().sendToAddress(sendToAddressPO)
         return response
     }
 
     fun testSendMoney10W(address:String): WiccSubmitTxJsonRpcResponse? {
-        var  sendToAddressPO = SendToAddressPO()
+        var  sendToAddressPO = SendTxPO()
         sendToAddressPO.amount = BigDecimal(10000000000000)
         sendToAddressPO.sendAddress = "wNd7RL89zKpJ7BRxcLXZjyEdaFHcvkXaXn"
-        sendToAddressPO.recvAddress = address
+        sendToAddressPO.receiveAddress = address
 
         var response = wiccMethodClient.getClient().sendToAddress(sendToAddressPO)
         return response
@@ -87,24 +87,14 @@ open class ContractXservice  {
         var getContractDataPO = GetContractDataPO()
         getContractDataPO.contractRegid = queryContractData.contractRegid
         getContractDataPO.key = ContractUtil.toHexString(queryContractData.key)
-        var response = wiccMethodClient.getClient().getContractDataRaw(getContractDataPO)
+        var response = wiccMethodClient.getClient().getScriptData(getContractDataPO)
 
         var contractDataVO = ContractDataVO()
         contractDataVO.contractRegid = queryContractData.contractRegid
         contractDataVO.key = queryContractData.key
         if(response.error == null){
-            var hexData = response.result.value
-            if("STRING".equals(queryContractData.returnDataType)){
-                contractDataVO.value = ContractUtil.hexToString(hexData)
-            }
-            else if("NUMBER".equals(queryContractData.returnDataType)){
-                contractDataVO.value = ContractUtil.upsidedownHex(hexData).toLong(16)
-            }
-            else{
-                contractDataVO.value = hexData
-            }
-        }
-        else{
+            contractDataVO.value = response.result.value
+        } else{
             contractDataVO.errorMsg = response.error.message
         }
 
@@ -125,8 +115,8 @@ open class ContractXservice  {
         if (response.result != null) {
             var vo = ContractInfoVO()
             vo.contractregid = response.result.contract_regid
-            vo.contractmemo = response.result.contract_memo
-            vo.contractcontent = ContractUtil.ConvertContractData(response.result.contract_content)
+            vo.contractmemo = response.result.memo
+            vo.contractcontent = ContractUtil.ConvertContractData(response.result.code)
             bizResponse.data = vo
         } else {
             if (response.error != null)  {
